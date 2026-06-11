@@ -1,0 +1,13 @@
+# Maven build output (Gatling reports end up in target/gatling)
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
