@@ -15,7 +15,7 @@ final class ApiHeaders {
 
     static final String ORIGIN = "https://werh.uat.wemagnus.com";
     static final String APP_ID = "WERH_UAT";
-    static final String TENANT_ID = "39443--BL00102706";
+    static final String TENANT_ID = "539596--BL00102516";
 
     private static final Map<String, String> BASE = Map.of(
             "authorization", "Bearer #{accessToken}",

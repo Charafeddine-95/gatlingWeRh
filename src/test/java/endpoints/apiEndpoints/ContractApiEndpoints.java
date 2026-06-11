@@ -17,7 +17,7 @@ public final class ContractApiEndpoints {
     private ContractApiEndpoints() {
     }
 
-    private static final String COLLECTIVITE_ID = config("werh.collectiviteId", "WERH_COLLECTIVITE_ID", "39443");
+    private static final String COLLECTIVITE_ID = config("werh.collectiviteId", "WERH_COLLECTIVITE_ID", "539596");
     private static final String APPLICATION_NAME = config("werh.applicationName", "WERH_APPLICATION_NAME", "DELIB");
 
     private static final String CONTRACT_EXISTS_PATH =

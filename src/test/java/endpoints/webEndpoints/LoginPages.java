@@ -8,6 +8,11 @@ import static io.gatling.javaapi.http.HttpDsl.status;
 
 import io.gatling.javaapi.core.ChainBuilder;
 import io.gatling.javaapi.http.HttpRequestActionBuilder;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,9 +29,9 @@ import java.util.UUID;
  * silent re-authorization save the authorization code from the redirect Location
  * fragment as "authorizationCode".
  *
- * Credentials are read from the JVM system properties werh.username/werh.password
- * (or the WERH_USERNAME/WERH_PASSWORD environment variables) so they are never
- * committed with the sources.
+ * Credentials are read from the JVM system properties werh.username/werh.password,
+ * the WERH_USERNAME/WERH_PASSWORD environment variables, or a .env file at the
+ * project root (first match wins) so they are never committed with the sources.
  */
 public final class LoginPages {
 
@@ -46,6 +51,10 @@ public final class LoginPages {
             "origin", "null",
             "upgrade-insecure-requests", "1");
 
+    // Must be initialized before USERNAME/PASSWORD: credential() reads it, and
+    // static fields initialize in declaration order.
+    private static final Map<String, String> DOT_ENV = loadDotEnv();
+
     private static final String USERNAME = credential("werh.username", "WERH_USERNAME");
     private static final String PASSWORD = credential("werh.password", "WERH_PASSWORD");
 
@@ -64,7 +73,32 @@ public final class LoginPages {
 
     private static String credential(String property, String envVariable) {
         String value = System.getProperty(property, System.getenv(envVariable));
+        if (value == null) {
+            value = DOT_ENV.get(envVariable);
+        }
         return value != null ? value : "";
+    }
+
+    /** KEY=VALUE lines of the optional .env file at the project root; # starts a comment. */
+    private static Map<String, String> loadDotEnv() {
+        Path file = Path.of(".env");
+        if (!Files.exists(file)) {
+            return Map.of();
+        }
+        try {
+            Map<String, String> values = new HashMap<>();
+            for (String line : Files.readAllLines(file)) {
+                String trimmed = line.trim();
+                int separator = trimmed.indexOf('=');
+                if (trimmed.isEmpty() || trimmed.startsWith("#") || separator < 1) {
+                    continue;
+                }
+                values.put(trimmed.substring(0, separator).trim(), trimmed.substring(separator + 1).trim());
+            }
+            return Map.copyOf(values);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /** Fresh random state/nonce, like the real client generates before each authorization request. */
