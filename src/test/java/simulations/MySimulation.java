@@ -5,6 +5,7 @@ import static io.gatling.javaapi.core.CoreDsl.pause;
 import static io.gatling.javaapi.core.CoreDsl.scenario;
 import static io.gatling.javaapi.http.HttpDsl.http;
 
+import endpoints.apiEndpoints.ReferentialApiEndpoints;
 import endpoints.webEndpoints.WebPages;
 import groups.simulationGroups.DashboardGroup;
 import groups.simulationGroups.GcuApprovalGroup;
@@ -43,14 +44,17 @@ public class MySimulation extends Simulation {
 
   /** Returning user: GCU already accepted on a previous connection. */
   ScenarioBuilder userJourney =
-      scenario("WeRH user journey").exec(
-          WebPages.home,
-          pause(1),
-          LoginGroup.login,
-          pause(Duration.ofMillis(500)),
-          DashboardGroup.open,
-          pause(6),
-          DashboardGroup.refresh);
+          scenario("WeRH user journey").exec(
+                  WebPages.home,
+                  pause(1),
+                  LoginGroup.login,
+                  pause(Duration.ofMillis(500)),
+                  // DashboardGroup.open,
+                  pause(6),
+                  // DashboardGroup.refresh
+                  WebPages.dossiersAgent,
+                  ReferentialApiEndpoints.etablissements
+          );
 
   {
     setUp(userJourney.injectOpen(atOnceUsers(1)).protocols(httpProtocol));

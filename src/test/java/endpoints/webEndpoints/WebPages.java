@@ -21,4 +21,10 @@ public final class WebPages {
             http("Home page")
                     .get("https://werh.uat.wemagnus.com/")
                     .headers(NAVIGATION_HEADERS);
+
+    public static final HttpRequestActionBuilder dossiersAgent =
+            http("Dossiers agent page")
+                    .get("https://werh.uat.wemagnus.com/mfe-agent/liste-agents")
+                    .headers(NAVIGATION_HEADERS);
+
 }
