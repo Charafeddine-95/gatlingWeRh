@@ -1,9 +1,8 @@
 package simulations;
 
-import static io.gatling.javaapi.core.CoreDsl.atOnceUsers;
-import static io.gatling.javaapi.core.CoreDsl.pause;
-import static io.gatling.javaapi.core.CoreDsl.scenario;
+import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.http;
+import static io.gatling.javaapi.http.HttpDsl.status;
 
 import endpoints.apiEndpoints.ReferentialApiEndpoints;
 import endpoints.webEndpoints.WebPages;
@@ -53,8 +52,10 @@ public class MySimulation extends Simulation {
                   pause(6),
                   // DashboardGroup.refresh
                   WebPages.dossiersAgent,
-                  ReferentialApiEndpoints.etablissements
-          );
+                  ReferentialApiEndpoints.etablissements.check(status().is(200),jsonPath("$[0].designation").is("ETS BL UN")
+
+
+                  ) );
 
   {
     setUp(userJourney.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
