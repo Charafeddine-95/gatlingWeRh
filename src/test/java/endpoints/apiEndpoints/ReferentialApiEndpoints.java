@@ -29,4 +29,9 @@ public final class ReferentialApiEndpoints {
             http("Etablissements")
                     .get(WERH_API + "/context/v1/etablissement")
                     .headers(ApiHeaders.bearerWithTenant("accept", "application/json","user-agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"));
+
+    public static final HttpRequestActionBuilder contract =
+            http("Contrat")
+                    .get(WERH_API + "/career/bff/dossier-agent/2026-06-01/contract?filters=%7B%22activite%22%3A%221%22%7D")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json","user-agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"));
 }

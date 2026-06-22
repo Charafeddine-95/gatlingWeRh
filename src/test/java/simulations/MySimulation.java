@@ -52,8 +52,9 @@ public class MySimulation extends Simulation {
                   pause(6),
                   // DashboardGroup.refresh
                   WebPages.dossiersAgent,
-                  ReferentialApiEndpoints.etablissements.check(status().is(200),jsonPath("$[0].designation").is("ETS BL UN")
-
+                  ReferentialApiEndpoints.collectivites.check(status().is(200),jsonPath("$[0].identite.designationCollectivite").is("BL UN")),
+                  ReferentialApiEndpoints.etablissements.check(status().is(200),jsonPath("$[0].designation").is("ETS BL UN")),
+                  ReferentialApiEndpoints.contract.check(status().is(200),jsonPath("$[0].nomUsage").is("KRUMAN")
 
                   ) );
 
