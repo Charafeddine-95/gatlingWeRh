@@ -5,6 +5,7 @@ import static io.gatling.javaapi.core.CoreDsl.pause;
 import static io.gatling.javaapi.core.CoreDsl.scenario;
 import static io.gatling.javaapi.http.HttpDsl.http;
 
+import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
 import groups.simulationGroups.AgentListGroup;
 import groups.simulationGroups.DashboardGroup;
@@ -32,6 +33,7 @@ public class MySimulation extends Simulation {
    */
   ScenarioBuilder firstConnection =
       scenario("WeRH first connection").exec(
+          ApiHeaders.initTenants,
           WebPages.home,
           pause(1),
           LoginGroup.login,
@@ -45,6 +47,7 @@ public class MySimulation extends Simulation {
   /** Returning user: GCU already accepted on a previous connection. */
   ScenarioBuilder userJourney =
       scenario("WeRH user journey").exec(
+          ApiHeaders.initTenants,
           WebPages.home,
           pause(1),
           LoginGroup.login,
@@ -56,6 +59,7 @@ public class MySimulation extends Simulation {
   /** Returning user opening the agents list page. */
   ScenarioBuilder agentsList =
       scenario("WeRH agents list").exec(
+          ApiHeaders.initTenants,
           WebPages.home,
           pause(1),
           LoginGroup.login,

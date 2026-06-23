@@ -7,21 +7,20 @@ import io.gatling.javaapi.http.HttpRequestActionBuilder;
 /**
  * Contract API calls.
  *
- * The collectivity id and application name come from the JVM system properties
- * werh.collectiviteId/werh.applicationName (or the WERH_COLLECTIVITE_ID/
- * WERH_APPLICATION_NAME environment variables), defaulting to the recorded
- * values 39443/DELIB.
+ * The contract is looked up by tenant id (the part before the "--"), read from the
+ * "tenantId" session attribute seeded by {@link ApiHeaders#initTenants}. The application
+ * name comes from the JVM system property werh.applicationName (or the WERH_APPLICATION_NAME
+ * environment variable), defaulting to DELIB.
  */
 public final class ContractApiEndpoints {
 
     private ContractApiEndpoints() {
     }
 
-    private static final String COLLECTIVITE_ID = config("werh.collectiviteId", "WERH_COLLECTIVITE_ID", "539596");
     private static final String APPLICATION_NAME = config("werh.applicationName", "WERH_APPLICATION_NAME", "DELIB");
 
     private static final String CONTRACT_EXISTS_PATH =
-            "/users/api/v1/contracts/exists/" + COLLECTIVITE_ID + "?applicationName=" + APPLICATION_NAME;
+            "/users/api/v1/contracts/exists/#{tenantId}?applicationName=" + APPLICATION_NAME;
 
     private static String config(String property, String envVariable, String defaultValue) {
         String value = System.getProperty(property, System.getenv(envVariable));
