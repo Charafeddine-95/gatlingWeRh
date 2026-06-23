@@ -6,6 +6,7 @@ import static io.gatling.javaapi.core.CoreDsl.scenario;
 import static io.gatling.javaapi.http.HttpDsl.http;
 
 import endpoints.webEndpoints.WebPages;
+import groups.simulationGroups.AgentListGroup;
 import groups.simulationGroups.DashboardGroup;
 import groups.simulationGroups.GcuApprovalGroup;
 import groups.simulationGroups.LoginGroup;
@@ -52,7 +53,18 @@ public class MySimulation extends Simulation {
           pause(6),
           DashboardGroup.refresh);
 
+  /** Returning user opening the agents list page. */
+  ScenarioBuilder agentsList =
+      scenario("WeRH agents list").exec(
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          pause(2),
+          AgentListGroup.open);
+
   {
-    setUp(userJourney.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(agentsList.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
