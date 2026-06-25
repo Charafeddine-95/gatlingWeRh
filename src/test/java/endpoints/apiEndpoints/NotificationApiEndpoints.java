@@ -18,4 +18,13 @@ public final class NotificationApiEndpoints {
                             "bluserid", "81227566-4b5f-46e8-bf64-bba0b4f20188",
                             "productid", ApiHeaders.APP_ID,
                             "tenantid", ApiHeaders.TENANT_ID));
+
+
+    public static final HttpRequestActionBuilder unreadNotif =
+            http("Unread notification")
+                    .get("/notif/sse/notification?status=UNREAD")
+                    .headers(ApiHeaders.bearerWithTenant(
+                            "bluserid", "81227566-4b5f-46e8-bf64-bba0b4f20188",
+                            "productid", ApiHeaders.APP_ID,
+                            "tenantid", ApiHeaders.TENANT_ID));
 }

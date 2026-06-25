@@ -1,5 +1,6 @@
 package endpoints.apiEndpoints;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,9 @@ final class ApiHeaders {
 
     static final String ORIGIN = "https://werh.uat.wemagnus.com";
     static final String APP_ID = "WERH_UAT";
-    static final String TENANT_ID = "539596--BL00102516";
+    //static final String TENANT_ID = "548040--BL00105678";
+    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    static final String TENANT_ID = dotenv.get("TENANT_ID");
 
     private static final Map<String, String> BASE = Map.of(
             "authorization", "Bearer #{accessToken}",

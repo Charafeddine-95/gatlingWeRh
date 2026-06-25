@@ -3,6 +3,7 @@ package endpoints.apiEndpoints;
 import static io.gatling.javaapi.http.HttpDsl.http;
 
 import io.gatling.javaapi.http.HttpRequestActionBuilder;
+import io.github.cdimascio.dotenv.Dotenv;
 
 /**
  * Contract API calls.
@@ -17,7 +18,9 @@ public final class ContractApiEndpoints {
     private ContractApiEndpoints() {
     }
 
-    private static final String COLLECTIVITE_ID = config("werh.collectiviteId", "WERH_COLLECTIVITE_ID", "539596");
+    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    static final String SPLIT_TENANT_ID = dotenv.get("TENANT_ID").split("--")[0];
+    private static final String COLLECTIVITE_ID = config("werh.collectiviteId", "WERH_COLLECTIVITE_ID", SPLIT_TENANT_ID);
     private static final String APPLICATION_NAME = config("werh.applicationName", "WERH_APPLICATION_NAME", "DELIB");
 
     private static final String CONTRACT_EXISTS_PATH =

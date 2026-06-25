@@ -1,9 +1,9 @@
 package simulations;
 
 import static io.gatling.javaapi.core.CoreDsl.*;
-import static io.gatling.javaapi.http.HttpDsl.http;
-import static io.gatling.javaapi.http.HttpDsl.status;
+import static io.gatling.javaapi.http.HttpDsl.*;
 
+import endpoints.apiEndpoints.NotificationApiEndpoints;
 import endpoints.apiEndpoints.ReferentialApiEndpoints;
 import endpoints.webEndpoints.WebPages;
 import groups.simulationGroups.DashboardGroup;
@@ -52,11 +52,22 @@ public class MySimulation extends Simulation {
                   pause(6),
                   // DashboardGroup.refresh
                   WebPages.dossiersAgent,
-                  ReferentialApiEndpoints.collectivites.check(status().is(200),jsonPath("$[0].identite.designationCollectivite").is("BL UN")),
-                  ReferentialApiEndpoints.etablissements.check(status().is(200),jsonPath("$[0].designation").is("ETS BL UN")),
-                  ReferentialApiEndpoints.contract.check(status().is(200),jsonPath("$[0].nomUsage").is("KRUMAN")
-
-                  ) );
+                  //ReferentialApiEndpoints.collectivites.check(status().is(200),jsonPath("$[0].identite.designationCollectivite").is("BL UN")),
+                  ReferentialApiEndpoints.collectivites.check(status().is(200)),
+                  ReferentialApiEndpoints.etablissements.check(status().is(200)),
+                  ReferentialApiEndpoints.contract.check(status().is(200)),
+                  NotificationApiEndpoints.unreadCount.check(status().is(200)),
+                  pause(5),
+                  WebPages.assistantPaie,
+                  ReferentialApiEndpoints.contratActif.check(status().is(200)),
+                  ReferentialApiEndpoints.agentUnpaid.check(status().is(200)),
+                  ReferentialApiEndpoints.contractPayCycle.check(status().is(200)),
+                  ReferentialApiEndpoints.dateRange.check(status().is(200)),
+                  ReferentialApiEndpoints.fonction.check(status().is(200)),
+                  ReferentialApiEndpoints.service.check(status().is(200)),
+                  ReferentialApiEndpoints.calculPaie,
+                  pause(15),
+                  ReferentialApiEndpoints.calculPaieClose);
 
   {
     setUp(userJourney.injectOpen(atOnceUsers(1)).protocols(httpProtocol));

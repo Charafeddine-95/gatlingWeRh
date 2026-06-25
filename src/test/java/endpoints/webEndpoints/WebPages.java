@@ -27,4 +27,8 @@ public final class WebPages {
                     .get("https://werh.uat.wemagnus.com/mfe-agent/liste-agents")
                     .headers(NAVIGATION_HEADERS);
 
+    public static final HttpRequestActionBuilder assistantPaie =
+            http("Assistant paie page")
+                    .get("https://werh.uat.wemagnus.com/mfe-paie/home")
+                    .headers(NAVIGATION_HEADERS);
 }
