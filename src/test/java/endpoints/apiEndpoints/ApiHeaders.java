@@ -70,9 +70,20 @@ public final class ApiHeaders {
         return Map.copyOf(headers);
     }
 
-    /** Bearer headers across all collectivites/etablissements. */
-    static Map<String, String> bearerForAllTenants() {
-        return bearerWithTenant("collectiviteid", "all", "etablissementid", "all");
+    /**
+     * Bearer headers across all collectivites/etablissements, extended with extra
+     * "name", "value" pairs (e.g. accept, content-type).
+     */
+    static Map<String, String> bearerForAllTenants(String... extraPairs) {
+        if (extraPairs.length % 2 != 0) {
+            throw new IllegalArgumentException("expected \"name\", \"value\" pairs");
+        }
+        Map<String, String> headers =
+                new HashMap<>(bearerWithTenant("collectiviteid", "all", "etablissementid", "all"));
+        for (int i = 0; i < extraPairs.length; i += 2) {
+            headers.put(extraPairs[i], extraPairs[i + 1]);
+        }
+        return Map.copyOf(headers);
     }
 
     private static String selectTenant(String tenantNb) {

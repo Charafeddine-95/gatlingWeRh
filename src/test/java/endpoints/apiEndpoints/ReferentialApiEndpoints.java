@@ -29,4 +29,46 @@ public final class ReferentialApiEndpoints {
             http("Etablissements")
                     .get(WERH_API + "/context/v1/etablissement")
                     .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Services (org units) used by the bulletin-control page filters. */
+    public static final HttpRequestActionBuilder service =
+            http("Services")
+                    .get(WERH_API + "/context/v1/service")
+                    .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
+    /** Job functions used by the bulletin-control page filters. */
+    public static final HttpRequestActionBuilder fonction =
+            http("Fonctions")
+                    .get(WERH_API + "/career/fonction")
+                    .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
+    // The lookups below are served by the wecross referential service (the protocol base URL).
+
+    /** Statut referential. */
+    public static final HttpRequestActionBuilder statut =
+            http("Referential statut")
+                    .get("/ref/referential/1.14/statut?full=true")
+                    .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
+    /** Sous-statut referential. */
+    public static final HttpRequestActionBuilder sousStatut =
+            http("Referential sousStatut")
+                    .get("/ref/referential/1.14/sousStatut?full=true")
+                    .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
+    /** Position referential. */
+    public static final HttpRequestActionBuilder position =
+            http("Referential position")
+                    .get("/ref/referential/1.14/position?full=true")
+                    .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
+    /** Reference date (MM/DD/YYYY) bounding the grade referential, as captured. */
+    private static final String CURRENT_PERIOD = "06/01/2026";
+
+    /** Grade referential, bounded to the current pay period. */
+    public static final HttpRequestActionBuilder grade =
+            http("Referential grade")
+                    .get("/ref/referential/1.14/grade?full=true&odm_data=dateDebut<=" + CURRENT_PERIOD
+                            + ",dateFin>=" + CURRENT_PERIOD)
+                    .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
 }

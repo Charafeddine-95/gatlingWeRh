@@ -8,9 +8,12 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
 import groups.simulationGroups.AgentListGroup;
+import groups.simulationGroups.ControleBulletinsGroup;
 import groups.simulationGroups.DashboardGroup;
 import groups.simulationGroups.GcuApprovalGroup;
 import groups.simulationGroups.LoginGroup;
+import groups.simulationGroups.PayAssistantGroup;
+import groups.simulationGroups.RecalculBulletinsGroup;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
@@ -68,7 +71,26 @@ public class MySimulation extends Simulation {
           pause(2),
           AgentListGroup.open);
 
+  /**
+   * Returning user opening the pay assistant, controlling the bulletins, then recomputing them.
+   * The recompute step opens the SSE stream that reports the calculation progress.
+   */
+  ScenarioBuilder payControlBulletins =
+      scenario("WeRH pay control bulletins").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          pause(2),
+          PayAssistantGroup.open,
+          pause(3),
+          ControleBulletinsGroup.open,
+          pause(4),
+          RecalculBulletinsGroup.recompute);
+
   {
-    setUp(agentsList.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(payControlBulletins.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
