@@ -32,8 +32,9 @@ public final class PayApiEndpoints {
 
     /**
      * Current payroll-cycle summary, and the correlation anchor of the pay journey: it saves the
-     * active etablissement id ("etablissementId") and the open payroll month as a full date
-     * ("payMonth", e.g. "2026-02" -> "2026-02-01") that every downstream pay call reuses.
+     * active etablissement id ("etablissementId"), the open payroll month as a full date
+     * ("payMonth", e.g. "2026-02" -> "2026-02-01") and the open cycle's id ("cyclePaieId") that
+     * downstream pay calls reuse — cyclePaieId notably feeds the agent payslip stream.
      */
     public static final HttpRequestActionBuilder cycleResume =
             http("Payroll cycle resume")
@@ -41,7 +42,8 @@ public final class PayApiEndpoints {
                     .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
                     .check(
                             jsonPath("$[0].etablissementId").saveAs("etablissementId"),
-                            jsonPath("$[0].dernierMoisOuvert").transform(month -> month + "-01").saveAs("payMonth"));
+                            jsonPath("$[0].dernierMoisOuvert").transform(month -> month + "-01").saveAs("payMonth"),
+                            jsonPath("$[0].cyclePaieId").saveAs("cyclePaieId"));
 
     /** Per-etablissement payroll-cycle status for the open month. */
     public static final HttpRequestActionBuilder cycleStatus =
@@ -134,4 +136,42 @@ public final class PayApiEndpoints {
                             sse.checkMessage("controle-bulletin event")
                                     .check(regex("\"calculStatus\":\"(.*?)\"").saveAs("calculStatus"))))
                     .exec(sse("Bulletins calcul stream").sseName("bulletinsCalcul").close());
+
+    // ---- Individual agent payslip (bulletin de paie) tab ----
+
+    /** Payroll cycles for the agent's etablissement, loaded with the payslip tab. */
+    public static final HttpRequestActionBuilder cyclePaieByEtablissement =
+            http("Pay cycles by etablissement")
+                    .get(WERH_API + "/pay/cycle-paie?etablissementId=#{etablissementId}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Contract situation for the open month, loaded with the payslip tab. */
+    public static final HttpRequestActionBuilder situationContrat =
+            http("Contract situation")
+                    .get(WERH_API + "/career/situation/contrat/#{contratId}?mois=#{payMonth}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Payslip list for the agent's contract in the open cycle, fetched right after the stream. */
+    public static final HttpRequestActionBuilder listeBulletin =
+            http("Agent bulletin list")
+                    .get(WERH_API + "/pay/paie/cycle-paie/#{cyclePaieId}/agent/#{agentId}/contrat/#{contratId}/listeBulletin")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /**
+     * Server-Sent Events stream backing an individual agent's payslip (bulletin de paie) tab. When
+     * the user opens the pay-stub tab, the front-end opens
+     * {apiPayUrl}/sse/bulletin?agentId=…&contratId=…&cyclePaieId=… and the server pushes a single
+     * "bulletin" event whose data carries the payslip (lignesPaie + resumeCumulatifPaie), then ends
+     * the stream. We open it, await that event (asserting the payslip lines arrived), then close.
+     * The three ids are correlated earlier in the journey: agentId/contratId from the agent
+     * contracts list (AgentApiEndpoints.contracts) and cyclePaieId from the payroll-cycle resume.
+     */
+    public static final ChainBuilder bulletinStream =
+            exec(sse("Agent bulletin stream").sseName("agentBulletin")
+                    .get(WERH_API + "/pay/sse/bulletin?agentId=#{agentId}&contratId=#{contratId}&cyclePaieId=#{cyclePaieId}")
+                    .headers(ApiHeaders.bearerWithTenant())
+                    .await(30).on(
+                            sse.checkMessage("bulletin event")
+                                    .check(regex("lignesPaie"))))
+                    .exec(sse("Agent bulletin stream").sseName("agentBulletin").close());
 }

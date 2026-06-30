@@ -7,6 +7,7 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
+import groups.simulationGroups.AgentBulletinGroup;
 import groups.simulationGroups.AgentListGroup;
 import groups.simulationGroups.ControleBulletinsGroup;
 import groups.simulationGroups.DashboardGroup;
@@ -71,6 +72,20 @@ public class MySimulation extends Simulation {
           pause(2),
           AgentListGroup.open);
 
+  /** Returning user opening an agent from the list, then its pay-stub (bulletin) tab. */
+  ScenarioBuilder agentBulletin =
+      scenario("WeRH agent bulletin").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          pause(2),
+          AgentListGroup.open,
+          pause(3),
+          AgentBulletinGroup.open);
+
   /**
    * Returning user opening the pay assistant, controlling the bulletins, then recomputing them.
    * The recompute step opens the SSE stream that reports the calculation progress.
@@ -91,6 +106,6 @@ public class MySimulation extends Simulation {
           RecalculBulletinsGroup.recompute);
 
   {
-    setUp(payControlBulletins.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(agentBulletin.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
