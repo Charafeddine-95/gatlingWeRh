@@ -4,8 +4,10 @@ import static io.gatling.javaapi.core.CoreDsl.StringBody;
 import static io.gatling.javaapi.core.CoreDsl.exec;
 import static io.gatling.javaapi.core.CoreDsl.jsonPath;
 import static io.gatling.javaapi.core.CoreDsl.regex;
+import static io.gatling.javaapi.core.CoreDsl.substring;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.sse;
+import static io.gatling.javaapi.http.HttpDsl.status;
 
 import io.gatling.javaapi.core.ChainBuilder;
 import io.gatling.javaapi.http.HttpRequestActionBuilder;
@@ -33,7 +35,8 @@ public final class PayApiEndpoints {
     /**
      * Current payroll-cycle summary, and the correlation anchor of the pay journey: it saves the
      * active etablissement id ("etablissementId"), the open payroll month as a full date
-     * ("payMonth", e.g. "2026-02" -> "2026-02-01") and the open cycle's id ("cyclePaieId") that
+     * ("payMonth", e.g. "2026-02" -> "2026-02-01"), the last closed month ("closedMonth", used by
+     * the "visualiser les bulletins" journey) and the open cycle's id ("cyclePaieId") that
      * downstream pay calls reuse — cyclePaieId notably feeds the agent payslip stream.
      */
     public static final HttpRequestActionBuilder cycleResume =
@@ -43,6 +46,7 @@ public final class PayApiEndpoints {
                     .check(
                             jsonPath("$[0].etablissementId").saveAs("etablissementId"),
                             jsonPath("$[0].dernierMoisOuvert").transform(month -> month + "-01").saveAs("payMonth"),
+                            jsonPath("$[0].dernierMoisCloture").transform(month -> month + "-01").saveAs("closedMonth"),
                             jsonPath("$[0].cyclePaieId").saveAs("cyclePaieId"));
 
     /** Per-etablissement payroll-cycle status for the open month. */
@@ -86,18 +90,47 @@ public final class PayApiEndpoints {
                     .headers(ApiHeaders.bearerForAllTenants("accept", "application/json", "content-type", "application/json"))
                     .body(StringBody(ETABLISSEMENT_BODY));
 
-    /** Bulletin-control contract list for the open month. */
+    /** Path of the bulletin-control contract list for the active month ("#{payMonth}"). */
+    private static final String CONTROLER_BULLETIN_PATH =
+            WERH_API + "/career/bff/cycle-paie/#{payMonth}/preparer/controler-bulletin/contrat?filters="
+                    + CONTROLE_BULLETIN_FILTERS;
+
+    /** Bulletin-control contract list for the active month. */
     public static final HttpRequestActionBuilder controlerBulletinContrat =
             http("Controler bulletin contrat")
-                    .get(WERH_API + "/career/bff/cycle-paie/#{payMonth}/preparer/controler-bulletin/contrat?filters="
-                            + CONTROLE_BULLETIN_FILTERS)
+                    .get(CONTROLER_BULLETIN_PATH)
                     .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
+    /**
+     * Same bulletin-control list, but also saves one random agent's bulletin id ("bulletinId") for
+     * the "visualiser les bulletins" journey, which renders that payslip via {@link #bulletinByIds}.
+     */
+    public static final HttpRequestActionBuilder controlerBulletinContratForView =
+            http("Controler bulletin contrat")
+                    .get(CONTROLER_BULLETIN_PATH)
+                    .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"))
+                    .check(jsonPath("$[*].bulletinId").findRandom().saveAs("bulletinId"));
 
     /** Bulletin calculation summary polled right after the recompute stream. */
     public static final HttpRequestActionBuilder calculationInfo =
             http("Bulletin calculation info")
                     .get(WERH_API + "/pay/bulletin/all/calculationInfo?month=#{payMonth}&etablissementIds=#{etablissementId}")
                     .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
+    /**
+     * Renders a payslip (bulletin) as a PDF for the "visualiser les bulletins" view. The body is a
+     * JSON array of {"bulletinId": …} objects; here we send the single id picked at random by
+     * {@link #controlerBulletinContratForView}. The response is the PDF itself
+     * (application/octet-stream), so we assert a 200 and that the body really is a PDF.
+     */
+    public static final HttpRequestActionBuilder bulletinByIds =
+            http("Bulletin by ids (PDF)")
+                    .post(WERH_API + "/pay/edition-paie/bulletins/by-bulletin-ids")
+                    .headers(ApiHeaders.bearerForAllTenants(
+                            "accept", "application/octet-stream", "content-type", "application/json"))
+                    .body(StringBody("[{\"bulletinId\":\"#{bulletinId}\"}]"))
+                    .check(status().is(200))
+                    .check(substring("%PDF").exists());
 
     /**
      * Server-Sent Events stream backing the "contrôle des bulletins" page summary (the synthèse

@@ -15,6 +15,7 @@ import groups.simulationGroups.GcuApprovalGroup;
 import groups.simulationGroups.LoginGroup;
 import groups.simulationGroups.PayAssistantGroup;
 import groups.simulationGroups.RecalculBulletinsGroup;
+import groups.simulationGroups.VisualiserBulletinsGroup;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
@@ -105,7 +106,25 @@ public class MySimulation extends Simulation {
           pause(4),
           RecalculBulletinsGroup.recompute);
 
+  /**
+   * Returning user opening the pay assistant, preparing the pay, then viewing the payslips and
+   * opening one random agent's bulletin — rendered as a PDF — to check it returns a document. Runs
+   * on the last closed month, where payslips are finalized.
+   */
+  ScenarioBuilder payVisualiserBulletins =
+      scenario("WeRH pay visualiser bulletins").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          pause(2),
+          PayAssistantGroup.open,
+          pause(3),
+          VisualiserBulletinsGroup.open);
+
   {
-    setUp(agentBulletin.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(payVisualiserBulletins.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
