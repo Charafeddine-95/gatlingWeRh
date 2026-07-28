@@ -21,4 +21,9 @@ public final class WebPages {
             http("Home page")
                     .get("https://wegf.uat.wemagnus.com/wegf-mfe-compta/home")
                     .headers(NAVIGATION_HEADERS);
-}
+
+        public static final HttpRequestActionBuilder Titre = 
+        http("Titre page")
+                .get("https://wegf.uat.wemagnus.com/wegf-mfe-compta/Execution/TitreListeFormulaire")
+                .headers(NAVIGATION_HEADERS);
+    }

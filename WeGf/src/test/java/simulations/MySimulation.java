@@ -8,6 +8,7 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
 import groups.simulationGroups.DashboardGroup;
+import groups.simulationGroups.ExecutionGroup;
 import groups.simulationGroups.LoginGroup;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
@@ -39,13 +40,7 @@ public class MySimulation extends Simulation {
           LoginGroup.login,
           pause(Duration.ofMillis(500)),
           DashboardGroup.open,
-          ExecutionApiEndpoints.title)
-          // Debug: getString takes the attribute name, not an EL expression — "#{userContextCBE}"
-          // would look up an attribute by that literal name and print null.
-          .exec(session -> {
-            System.out.println(">>> userContextCBE = " + session.get("userContextCBE"));
-            return session;
-          });
+          ExecutionGroup.Titre);
 
   {
     setUp(homeGF.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
