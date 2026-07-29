@@ -32,8 +32,8 @@ public class MySimulation extends Simulation {
    * opening one random agent's bulletin — rendered as a PDF — to check it returns a document. Runs
    * on the last closed month, where payslips are finalized.
    */
-  ScenarioBuilder homeGF =
-      scenario("WeGf pay visualiser bulletins").exec(
+  ScenarioBuilder titreGF =
+      scenario("WeGF titres").exec(
           ApiHeaders.initTenants,
           WebPages.home,
           pause(1),
@@ -43,6 +43,6 @@ public class MySimulation extends Simulation {
           ExecutionGroup.Titre);
 
   {
-    setUp(homeGF.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(titreGF.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
