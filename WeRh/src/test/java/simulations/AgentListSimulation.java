@@ -7,6 +7,7 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
+import groups.simulationGroups.AgentDossierGroup;
 import groups.simulationGroups.AgentListGroup;
 import groups.simulationGroups.DashboardGroup;
 import groups.simulationGroups.LoginGroup;
@@ -40,7 +41,10 @@ public class AgentListSimulation extends Simulation {
           pause(Duration.ofMillis(500)),
           DashboardGroup.open,
           pause(2),
-          AgentListGroup.open);
+          AgentListGroup.open,
+
+              AgentDossierGroup.open
+              );
 
   {
     setUp(agentsList.injectOpen(atOnceUsers(1)).protocols(httpProtocol));

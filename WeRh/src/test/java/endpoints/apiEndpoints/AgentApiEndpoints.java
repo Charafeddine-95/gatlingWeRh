@@ -103,5 +103,13 @@ public final class AgentApiEndpoints {
     public static final HttpRequestActionBuilder contratDetail =
             http("Contract detail")
                     .get(WERH_API + "/career/contrat/#{contratId}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
+                    .check(jsonPath("$.situations[0].statut_id").saveAs("contratStatutId"))
+            ;
+
+    public static final HttpRequestActionBuilder droitStatus =
+            http("Droit status")
+                    .get(WERH_API + "/career/droit/status/#{contratStatutId}")
                     .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
 }
