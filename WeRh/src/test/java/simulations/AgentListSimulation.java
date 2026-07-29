@@ -1,16 +1,11 @@
 package simulations;
 
-import static io.gatling.javaapi.core.CoreDsl.atOnceUsers;
-import static io.gatling.javaapi.core.CoreDsl.pause;
-import static io.gatling.javaapi.core.CoreDsl.scenario;
+import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.http;
 
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
-import groups.simulationGroups.AgentDossierGroup;
-import groups.simulationGroups.AgentListGroup;
-import groups.simulationGroups.DashboardGroup;
-import groups.simulationGroups.LoginGroup;
+import groups.simulationGroups.*;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
@@ -46,7 +41,36 @@ public class AgentListSimulation extends Simulation {
               AgentDossierGroup.open
               );
 
+  ScenarioBuilder agentsListThenDossierAgent =
+          scenario("Agents List then Dossier Agent")
+                  .exitBlockOnFail()
+                  .on(
+                          exec(
+                                  ApiHeaders.initTenants,
+                                  WebPages.home,
+                                  pause(1),
+                                  LoginGroup.login,
+                                  pause(Duration.ofMillis(500)),
+                                  DashboardGroup.open,
+                                  pause(2),
+                                  AgentListGroup.open,
+                                  AgentDossierGroup.open,
+                                  pause(2)
+                          ),
+                          exec(
+                                  randomSwitch()
+                                          .on(
+                                                  percent(50.0)
+                                                          .then(
+                                                                  exec(
+                                                                          AgentBulletinGroup.open
+                                                                  )
+                                                          )
+                                          )
+                          )
+                  );
+
   {
-    setUp(agentsList.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(agentsListThenDossierAgent.injectOpen(atOnceUsers(10)).protocols(httpProtocol));
   }
 }

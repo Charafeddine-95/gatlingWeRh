@@ -21,6 +21,7 @@ public final class AgentListGroup {
     public static final ChainBuilder open =
             group("Open agents list").on(
                     WebPages.listeAgent,
+                    AgentApiEndpoints.listeAgents,
                     ReferentialApiEndpoints.etablissements
                             .resources(ReferentialApiEndpoints.collectivites),
                     pause(Duration.ofMillis(500)),

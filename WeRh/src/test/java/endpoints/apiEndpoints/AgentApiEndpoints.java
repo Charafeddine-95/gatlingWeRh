@@ -51,61 +51,61 @@ public final class AgentApiEndpoints {
          */
         public static final HttpRequestActionBuilder contracts = http("Agent contracts")
                         .get(AGENT_LIST_PATH)
-                        .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
-                        .check(
-                                        jsonPath("$[0].agentId").saveAs("agentId"),
-                                        jsonPath("$[0].contratId").saveAs("contratId"));
+                        .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+//                        .check(
+//                                        jsonPath("$[0].agentId").saveAs("agentId"),
+//                                        jsonPath("$[0].contratId").saveAs("contratId"));
 
     public static final HttpRequestActionBuilder listeAgents =
             http("Agent contracts")
-                    .get(WEGF_API + "/career/bff/dossier-agent/" + AGENT_LIST_DATE + "/contract")
-                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json")
+                    .get(WERH_API + "/career/bff/dossier-agent/" + AGENT_LIST_DATE + "/contract")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
                     .check(jmesPath("[*].{agentId: agentId, contratId: contratId, fonctionId: fonctionId,"
         + " droitId: droitId, statutId: statutId, collectiviteId: collectiviteId,"
         + " etablissementId: etablissementId}")
         .ofList().saveAs("agents"),
-        jsonPath("$[?(@.droitId)]").ofMap().findRandom().saveAs("active_agent")));
+        jsonPath("$[?(@.droitId)]").ofMap().findRandom().saveAs("active_agent"));
 
         /** Agent latest situation, the first call fired when an agent is opened. */
         public static final HttpRequestActionBuilder latestSituation = http("Agent latest situation")
-                        .post(WERH_API + "/career/bff/agents-with-latest-situation/#{agentId}/last")
+                        .post(WERH_API + "/career/bff/agents-with-latest-situation/#{active_agent.agentId}/last")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json", "content-type",
                                         "application/json"));
 
         /** Agent core record (fired as the detail tabs mount). */
         public static final HttpRequestActionBuilder agentDetail = http("Agent detail")
-                        .get(WERH_API + "/agent/agent/#{agentId}")
+                        .get(WERH_API + "/agent/agent/#{active_agent.agentId}")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
         /** Agent identity section. */
         public static final HttpRequestActionBuilder agentIdentite = http("Agent identite")
-                        .get(WERH_API + "/agent/agent/identite/#{agentId}")
+                        .get(WERH_API + "/agent/agent/identite/#{active_agent.agentId}")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
         /** Agent address section. */
         public static final HttpRequestActionBuilder agentAdresse = http("Agent adresse")
-                        .get(WERH_API + "/agent/agent/adresse/#{agentId}")
+                        .get(WERH_API + "/agent/agent/adresse/#{active_agent.agentId}")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
         /** Agent birth section. */
         public static final HttpRequestActionBuilder agentNaissance = http("Agent naissance")
-                        .get(WERH_API + "/agent/agent/naissance/#{agentId}")
+                        .get(WERH_API + "/agent/agent/naissance/#{active_agent.agentId}")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
         /** Agent contact section. */
         public static final HttpRequestActionBuilder agentContact = http("Agent contact")
-                        .get(WERH_API + "/agent/agent/contact/#{agentId}")
+                        .get(WERH_API + "/agent/agent/contact/#{active_agent.agentId}")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
         /** Agent bank details section. */
         public static final HttpRequestActionBuilder agentBank = http("Agent bank details")
-                        .get(WERH_API + "/agent/agent/domiciliationBancaire/#{agentId}")
+                        .get(WERH_API + "/agent/agent/domiciliationBancaire/#{active_agent.agentId}")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
     /** Contract detail for the selected agent contract. */
     public static final HttpRequestActionBuilder contratDetail =
             http("Contract detail")
-                    .get(WERH_API + "/career/contrat/#{contratId}")
+                    .get(WERH_API + "/career/contrat/#{active_agent.contratId}")
                     .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
                     .check(jsonPath("$.situations[0].statut_id").saveAs("contratStatutId"))
             ;

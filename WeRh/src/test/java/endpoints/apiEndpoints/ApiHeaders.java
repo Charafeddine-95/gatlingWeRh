@@ -30,7 +30,7 @@ public final class ApiHeaders {
     private static final String TENANT_1_ID_WITH_CONTEXT = "548040--BL00105678";
     private static final String TENANT_2_ID_WITH_CONTEXT = "548041--BL00105683";
     private static final String ACTIVE_TENANT_ID_WITH_CONTEXT =
-            selectTenant(config("tenant_nb", "TENANT_NB", "1"));
+            selectTenant(config("tenant_nb", "TENANT_NB", "2"));
     private static final String ACTIVE_TENANT_ID = tenantIdOf(ACTIVE_TENANT_ID_WITH_CONTEXT);
 
     private static final Map<String, String> BASE = Map.of(

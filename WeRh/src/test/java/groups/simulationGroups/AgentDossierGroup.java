@@ -20,34 +20,19 @@ public final class AgentDossierGroup {
             group("Open agents dossier").on(
                     ReferentialApiEndpoints.etablissements
                             .resources(ReferentialApiEndpoints.collectivites),
-
                     AgentApiEndpoints.addressTypes,
-
                     AgentApiEndpoints.latestSituation,
 
                     repeat(5).on(AgentApiEndpoints.agentDetail),
 
                     AgentApiEndpoints.agentIdentite,
-
                     AgentApiEndpoints.agentAdresse,
-
                     AgentApiEndpoints.agentBank,
-
                     AgentApiEndpoints.agentNaissance,
-
                     AgentApiEndpoints.agentContact,
-
                     ReferentialApiEndpoints.fonction,
-
                     AgentApiEndpoints.contratDetail,
-
                     ReferentialApiEndpoints.sousStatut,
-
                     AgentApiEndpoints.droitStatus
-
-
-
-
-
             );
 }

@@ -55,7 +55,7 @@ public final class WebPages {
 
         public static final HttpRequestActionBuilder dossierAgentFrom = http("Dossier agent from")
                         .get("https://werh.uat.wemagnus.com/mfe-agent/dossier-agent")
-                        .queryParam("id", "#{agentId}")
+                        .queryParam("id", "#{active_agent.agentId}")
                         .queryParam("from", "#{fromModule}")
                         .queryParam("params", WebPages::encodeParams)
                         .queryParam("moisCycle", "#{moisCycle}");
@@ -64,6 +64,6 @@ public final class WebPages {
         public static final HttpRequestActionBuilder dossierAgentDepuisListe =
         http("Dossier agent")
                 .get("https://werh.uat.wemagnus.com/mfe-agent/dossier-agent")
-                .queryParam("id", "#{agentId}")
+                .queryParam("id", "#{active_agent.agentId}")
                 .queryParam("from", "mfe-agent_liste-agents");                        
 }

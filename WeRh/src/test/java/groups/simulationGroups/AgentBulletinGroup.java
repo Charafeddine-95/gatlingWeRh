@@ -5,6 +5,7 @@ import static io.gatling.javaapi.core.CoreDsl.pause;
 
 import endpoints.apiEndpoints.AgentApiEndpoints;
 import endpoints.apiEndpoints.PayApiEndpoints;
+import endpoints.webEndpoints.WebPages;
 import io.gatling.javaapi.core.ChainBuilder;
 import java.time.Duration;
 
@@ -23,16 +24,6 @@ public final class AgentBulletinGroup {
     /** Click an agent (profile + contract burst), open the pay-stub tab, consume the SSE. */
     public static final ChainBuilder open =
             group("Open agent bulletin").on(
-                    AgentApiEndpoints.latestSituation
-                            .resources(
-                                    AgentApiEndpoints.agentDetail,
-                                    AgentApiEndpoints.agentIdentite,
-                                    AgentApiEndpoints.agentAdresse,
-                                    AgentApiEndpoints.agentNaissance,
-                                    AgentApiEndpoints.agentContact,
-                                    AgentApiEndpoints.agentBank,
-                                    AgentApiEndpoints.contratDetail),
-                    pause(Duration.ofSeconds(2)),
                     PayApiEndpoints.cyclePaieByEtablissement
                             .resources(PayApiEndpoints.situationContrat),
                     pause(Duration.ofMillis(500)),

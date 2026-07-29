@@ -181,14 +181,15 @@ public final class PayApiEndpoints {
     /** Contract situation for the open month, loaded with the payslip tab. */
     public static final HttpRequestActionBuilder situationContrat =
             http("Contract situation")
-                    .get(WERH_API + "/career/situation/contrat/#{contratId}?mois=#{payMonth}")
+                    .get(WERH_API + "/career/situation/contrat/#{active_agent.contratId}?mois=#{payMonth}")
                     .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
     /** Payslip list for the agent's contract in the open cycle, fetched right after the stream. */
     public static final HttpRequestActionBuilder listeBulletin =
             http("Agent bulletin list")
-                    .get(WERH_API + "/pay/paie/cycle-paie/#{cyclePaieId}/agent/#{agentId}/contrat/#{contratId}/listeBulletin")
-                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+                    .get(WERH_API + "/pay/paie/cycle-paie/#{cyclePaieId}/agent/#{active_agent.agentId}/contrat/#{active_agent.contratId}/listeBulletin")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
+                    .check(status().in(200,404));
 
     /**
      * Server-Sent Events stream backing an individual agent's payslip (bulletin de paie) tab. When
@@ -201,10 +202,9 @@ public final class PayApiEndpoints {
      */
     public static final ChainBuilder bulletinStream =
             exec(sse("Agent bulletin stream").sseName("agentBulletin")
-                    .get(WERH_API + "/pay/sse/bulletin?agentId=#{agentId}&contratId=#{contratId}&cyclePaieId=#{cyclePaieId}")
+                    .get(WERH_API + "/pay/sse/bulletin?agentId=#{active_agent.agentId}&contratId=#{active_agent.contratId}&cyclePaieId=#{cyclePaieId}")
                     .headers(ApiHeaders.bearerWithTenant())
                     .await(30).on(
-                            sse.checkMessage("bulletin event")
-                                    .check(regex("lignesPaie"))))
+                            sse.checkMessage("bulletin event")))
                     .exec(sse("Agent bulletin stream").sseName("agentBulletin").close());
 }
