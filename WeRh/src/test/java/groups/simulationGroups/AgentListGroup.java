@@ -7,6 +7,7 @@ import endpoints.apiEndpoints.AgentApiEndpoints;
 import endpoints.apiEndpoints.CityApiEndpoints;
 import endpoints.apiEndpoints.PayApiEndpoints;
 import endpoints.apiEndpoints.ReferentialApiEndpoints;
+import endpoints.webEndpoints.WebPages;
 import io.gatling.javaapi.core.ChainBuilder;
 import java.time.Duration;
 
@@ -19,6 +20,7 @@ public final class AgentListGroup {
     /** Main XHR burst observed on the agent list page, excluding telemetry and script assets. */
     public static final ChainBuilder open =
             group("Open agents list").on(
+                    WebPages.listeAgent,
                     ReferentialApiEndpoints.etablissements
                             .resources(ReferentialApiEndpoints.collectivites),
                     pause(Duration.ofMillis(500)),

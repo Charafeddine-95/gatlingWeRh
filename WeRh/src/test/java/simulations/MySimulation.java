@@ -125,6 +125,6 @@ public class MySimulation extends Simulation {
           VisualiserBulletinsGroup.open);
 
   {
-    setUp(payVisualiserBulletins.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(agentBulletin.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
