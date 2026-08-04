@@ -42,7 +42,17 @@ public class MySimulation extends Simulation {
           DashboardGroup.open,
           ExecutionGroup.Titre);
 
+
+  ScenarioBuilder mandatGF =
+      scenario("WeGF mandats").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          ExecutionGroup.Mandat);
   {
-    setUp(titreGF.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(mandatGF.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
