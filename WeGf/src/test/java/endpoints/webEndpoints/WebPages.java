@@ -32,4 +32,8 @@ public final class WebPages {
                         .get("https://wegf.uat.wemagnus.com/wegf-mfe-compta/Execution/MandatListeFormulaire")
                         .headers(NAVIGATION_HEADERS);
 
+        public static final HttpRequestActionBuilder PJ = http("PJ page")
+                .get("https://wegf.uat.wemagnus.com/wegf-mfe-compta/Execution/PieceJustificativeListeFormulaire")
+                .headers(NAVIGATION_HEADERS);
+
 }
