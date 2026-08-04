@@ -111,6 +111,8 @@ public final class ExecutionApiEndpoints {
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("donnees[0].id").ofInt().gt(0));
 
+        // TODO : Randomize the liqID we pick instead of picking the first one of the
+        // response
         public static final HttpRequestActionBuilder liquidationsMandat = http("Liquidations titre")
                         .get("https://wegf-api.uat.wemagnus.com/compta/liquidations")
                         .queryParam("fields[liquidations]", LIQUIDATIONS_FIELDS)
@@ -123,7 +125,8 @@ public final class ExecutionApiEndpoints {
                         .queryParam("filter[debitOffice]", false)
                         .queryParam("filter[finExo]", false)
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
-                        .check(jmesPath("data[0].id").ofInt().gt(0));
+                        .check(jmesPath("data[0].id").ofInt().gt(0),
+                                        jsonPath("$.donnees[0].id").findRandom().saveAs("liqId"));
 
         // TODO Hardcoded values for now, need to know where does the values come from
         public static final HttpRequestActionBuilder chargerListeBordereauPreparatoireMandat = http(
@@ -147,31 +150,58 @@ public final class ExecutionApiEndpoints {
 
         // Pièces Justificatives
         public static final HttpRequestActionBuilder chargerCollectivte = http(
-                "Charger la collectivité")
-                .post("https://wegf-api.uat.wemagnus.com/compta/UcPJUtilisateur/chargerCollectivite?")
-                .queryParam("fieldNames[]", "circuitValidationPJ")
-                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
-                .body(StringBody(
-                        """
-                                {"idCol":1,"elementACharger":["circuitValidationPJ"]}
-                                """))
-                .check(jmesPath("\"@id\"").ofInt().gt(0));
-
+                        "Charger la collectivité")
+                        .post("https://wegf-api.uat.wemagnus.com/compta/UcPJUtilisateur/chargerCollectivite?")
+                        .queryParam("fieldNames[]", "circuitValidationPJ")
+                        .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                        .body(StringBody(
+                                        """
+                                                        {"idCol":1,"elementACharger":["circuitValidationPJ"]}
+                                                        """))
+                        .check(jmesPath("\"@id\"").ofInt().gt(0));
 
         public static final HttpRequestActionBuilder chargerListeBudget = http(
-                "Charger la Liste de budget")
-                .post("https://wegf-api.uat.wemagnus.com/compta/UcPJUtilisateur/chargerListeBudget?")
-                .queryParam("fieldNames[]", "*.id,*.code, *.libelle")
-                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
-                .body(StringBody(
-                        """
-                                {"idCol":1}
-                                """))
-                .check(jmesPath("\"@id\"").ofInt().gt(0));
+                        "Charger la Liste de budget")
+                        .post("https://wegf-api.uat.wemagnus.com/compta/UcPJUtilisateur/chargerListeBudget?")
+                        .queryParam("fieldNames[]", "*.id,*.code, *.libelle")
+                        .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                        .body(StringBody(
+                                        """
+                                                        {"idCol":1}
+                                                        """))
+                        .check(jmesPath("\"@id\"").ofInt().gt(0));
 
         public static final HttpRequestActionBuilder piecesJustificatives = http(
-                "Charger la Liste de pieces Justificatives")
-                .get("https://wegf-api.uat.wemagnus.com/compta/piecesJustificatives?archivee=false&transmise=false&numeroPiece=0&piecesComplementaires=false&colonnes=de_DelaiPaiementAffichage%2CetatLiquidation%2CdelaiPaiement%2Ctype%2CtiersAliasPrefCode%2CdateReception%2Cdescription%2CmontantTtc%2CidInterne%2CnomPieceJustificative%2CidUniquePes%2CcodeLibelle%2CdateTransmission%2CdateAcquittement%2Cstatut%2CidBudgetDestinatairePJ%2CcodeBudgetDestinataire%2ClibelleBudgetDestinatairePJ%2CnbPJComplementaires%2CjustificatifPaiement%2Carchivee")
-                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
-                .check(jmesPath("data[0].type").exists());
+                        "Charger la Liste de pieces Justificatives")
+                        .get("https://wegf-api.uat.wemagnus.com/compta/piecesJustificatives?archivee=false&transmise=false&numeroPiece=0&piecesComplementaires=false&colonnes=de_DelaiPaiementAffichage%2CetatLiquidation%2CdelaiPaiement%2Ctype%2CtiersAliasPrefCode%2CdateReception%2Cdescription%2CmontantTtc%2CidInterne%2CnomPieceJustificative%2CidUniquePes%2CcodeLibelle%2CdateTransmission%2CdateAcquittement%2Cstatut%2CidBudgetDestinatairePJ%2CcodeBudgetDestinataire%2ClibelleBudgetDestinatairePJ%2CnbPJComplementaires%2CjustificatifPaiement%2Carchivee")
+                        .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                        .check(jmesPath("data[0].type").exists());
+
+        // ENGAGEMENTS
+
+        public static final HttpRequestActionBuilder operationInvestissement = http(
+                        "Operation investissement")
+                        .get("https://wegf-api.uat.wemagnus.com/compta/engagements/operation-investissement?exerciceId=#{userContextCBE.exercice.exercice.id}")
+                        .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                        .check(jmesPath("data[0].id").exists());
+
+        public static final HttpRequestActionBuilder apae = http(
+                        "apae")
+                        .get("https://wegf-api.uat.wemagnus.com/compta/engagements/apae?exerciceId=#{userContextCBE.exercice.exercice.id}")
+                        .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                        .check(jmesPath("data[0].id").exists());
+
+        public static final HttpRequestActionBuilder exerciceComptable = http(
+                        "Exercice Comptable")
+                        .get("https://wegf-api.uat.wemagnus.com/compta/exerciceComptable?exerciceComptableId=#{userContextCBE.exercice.exercice.id}")
+                        .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                        .check(jmesPath("id").ofInt().gt(0));
+
+
+                        // TODO Query String
+                        public static final HttpRequestActionBuilder engagements = http(
+                                "Liste Engagements")
+                                .get("https://wegf-api.uat.wemagnus.com/compta/engagements?sensId=2&urgent=false&exerciceId=#{userContextCBE.exercice.exercice.id}&solde=false&echeancier=false&colonnes=numeroEngagement%2CtiersComptable.codeAliasPrefTiers%2Cobjet%2CcodeCompteUtilisateur%2CmontantHT%2CmontantTTC%2CmontantResteEngage%2Cdate")
+                                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                                .check(jmesPath("data[0].id").exists());
 }
