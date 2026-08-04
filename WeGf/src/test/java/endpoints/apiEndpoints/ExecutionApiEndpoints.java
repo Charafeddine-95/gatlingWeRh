@@ -145,4 +145,33 @@ public final class ExecutionApiEndpoints {
                                         "{\"exercice\":{\"id\":#{userContextCBE.exercice.exercice.id},\"marque\":0,\"sourceInformationRatios\":{\"_id\":1,\"_lib\":\"DGCP\",\"@id\":3,\"@type\":\"TypeSourceInformation\"},\"millesime\":#{millesime},\"budgetRef\":{\"id\":1,\"marque\":0,\"collectiviteRef\":{\"id\":1,\"marque\":0,\"@id\":5,\"@type\":\"Collectivite\"},\"@id\":4,\"@type\":\"Budget\"},\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":6,\"@type\":\"NormeComptable\"},\"comptableAssignataireRef\":{\"id\":1,\"marque\":0,\"@id\":7,\"@type\":\"ComptableAssignataire\"},\"@id\":2,\"@type\":\"ExerciceComptable\"},\"sens\":{\"_id\":2,\"_lib\":\"Dépense\",\"@id\":2,\"@type\":\"TypeGestionSens\"},\"pmmvt\":null}"))
                         .check(jmesPath("donnees[0].id").ofInt().gt(0));
 
+        // Pièces Justificatives
+        public static final HttpRequestActionBuilder chargerCollectivte = http(
+                "Charger la collectivité")
+                .post("https://wegf-api.uat.wemagnus.com/compta/UcPJUtilisateur/chargerCollectivite?")
+                .queryParam("fieldNames[]", "circuitValidationPJ")
+                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                .body(StringBody(
+                        """
+                                {"idCol":1,"elementACharger":["circuitValidationPJ"]}
+                                """))
+                .check(jmesPath("\"@id\"").ofInt().gt(0));
+
+
+        public static final HttpRequestActionBuilder chargerListeBudget = http(
+                "Charger la Liste de budget")
+                .post("https://wegf-api.uat.wemagnus.com/compta/UcPJUtilisateur/chargerListeBudget?")
+                .queryParam("fieldNames[]", "*.id,*.code, *.libelle")
+                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                .body(StringBody(
+                        """
+                                {"idCol":1}
+                                """))
+                .check(jmesPath("\"@id\"").ofInt().gt(0));
+
+        public static final HttpRequestActionBuilder piecesJustificatives = http(
+                "Charger la Liste de pieces Justificatives")
+                .get("https://wegf-api.uat.wemagnus.com/compta/piecesJustificatives?archivee=false&transmise=false&numeroPiece=0&piecesComplementaires=false&colonnes=de_DelaiPaiementAffichage%2CetatLiquidation%2CdelaiPaiement%2Ctype%2CtiersAliasPrefCode%2CdateReception%2Cdescription%2CmontantTtc%2CidInterne%2CnomPieceJustificative%2CidUniquePes%2CcodeLibelle%2CdateTransmission%2CdateAcquittement%2Cstatut%2CidBudgetDestinatairePJ%2CcodeBudgetDestinataire%2ClibelleBudgetDestinatairePJ%2CnbPJComplementaires%2CjustificatifPaiement%2Carchivee")
+                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                .check(jmesPath("data[0].type").exists());
 }

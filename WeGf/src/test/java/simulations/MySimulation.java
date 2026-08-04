@@ -52,7 +52,18 @@ public class MySimulation extends Simulation {
           pause(Duration.ofMillis(500)),
           DashboardGroup.open,
           ExecutionGroup.Mandat);
+
+
+  ScenarioBuilder Pj =
+          scenario("WeGF Pièces Justificatives").exec(
+                  ApiHeaders.initTenants,
+                  WebPages.home,
+                  pause(1),
+                  LoginGroup.login,
+                  pause(Duration.ofMillis(500)),
+                  DashboardGroup.open,
+                  ExecutionGroup.PJ);
   {
-    setUp(mandatGF.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(Pj.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }

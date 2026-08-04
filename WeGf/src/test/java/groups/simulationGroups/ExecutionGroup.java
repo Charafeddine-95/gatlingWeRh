@@ -41,6 +41,16 @@ public final class ExecutionGroup {
                 ExecutionApiEndpoints.chargerListeCompteUtilParModeleMvtMandat,
                 ExecutionApiEndpoints.chargerListeBordereauPreparatoireMandat,
                 WebPages.Mandat
-            );      
+            );
+
+    /** The user accepts the GCU dialog — only part of the first-connection journey. */
+    public static final ChainBuilder PJ =
+            group("Pièces Justificatives").on(
+                    ExecutionApiEndpoints.chargerCollectivte,
+                    ExecutionApiEndpoints.chargerListeBudget,
+                    ExecutionApiEndpoints.piecesJustificatives,
+                    WebPages.PJ
+            );
+
 
 }
