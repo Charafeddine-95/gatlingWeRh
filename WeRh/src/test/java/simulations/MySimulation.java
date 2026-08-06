@@ -4,6 +4,9 @@ import static io.gatling.javaapi.core.CoreDsl.atOnceUsers;
 import static io.gatling.javaapi.core.CoreDsl.pause;
 import static io.gatling.javaapi.core.CoreDsl.scenario;
 import static io.gatling.javaapi.http.HttpDsl.http;
+import static io.gatling.javaapi.core.CoreDsl.doIfOrElse;
+import static io.gatling.javaapi.core.CoreDsl.exec;
+
 
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
@@ -13,6 +16,7 @@ import groups.simulationGroups.ControleBulletinsGroup;
 import groups.simulationGroups.DashboardGroup;
 import groups.simulationGroups.GcuApprovalGroup;
 import groups.simulationGroups.LoginGroup;
+import groups.simulationGroups.OuverturePaieGroup;
 import groups.simulationGroups.PayAssistantGroup;
 import groups.simulationGroups.RecalculBulletinsGroup;
 import groups.simulationGroups.VisualiserBulletinsGroup;
@@ -124,7 +128,26 @@ public class MySimulation extends Simulation {
           pause(3),
           VisualiserBulletinsGroup.open);
 
+
+    ScenarioBuilder ouvertureMoisPaie =
+    scenario("Ouverture mois paie").exec(
+        ApiHeaders.initTenants,
+        WebPages.home,
+        pause(1),
+        LoginGroup.login,
+        pause(Duration.ofMillis(500)),
+        DashboardGroup.open,
+        pause(2),
+        PayAssistantGroup.open,
+        pause(3),
+        doIfOrElse(session -> session.contains("nextMonth"))
+                .then(OuverturePaieGroup.open)
+                .orElse(exec(session -> {
+                    System.out.println(">>> nextMonth absent — ouverture ignorée");
+                    return session;
+                })));
+
   {
-    setUp(agentBulletin.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(ouvertureMoisPaie.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }

@@ -18,6 +18,8 @@ public final class PayAssistantGroup {
     public static final ChainBuilder open =
             group("Open pay assistant").on(
                     PayApiEndpoints.cycleResume,
+                    PayApiEndpoints.spreadActiveCycle,
+                    PayApiEndpoints.computeNextMonth,
                     PayApiEndpoints.cycleStatus
                             .resources(
                                     PayApiEndpoints.monthPayByEtablissement,
