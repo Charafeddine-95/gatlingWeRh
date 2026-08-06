@@ -8,6 +8,7 @@ import static io.gatling.javaapi.core.CoreDsl.substring;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.sse;
 import static io.gatling.javaapi.http.HttpDsl.status;
+import static io.gatling.javaapi.core.CoreDsl.bodyLength;
 
 import io.gatling.javaapi.core.ChainBuilder;
 import io.gatling.javaapi.core.Session;
@@ -40,7 +41,7 @@ public final class PayApiEndpoints {
          */
 
         // TODO TEST
-        private static final String ETABLISSEMENT_BODY = "[\"#{etablissementIds.jsonStringify()}\"]";
+        private static final String ETABLISSEMENT_BODY = "#{etablissementIds.jsonStringify()}";
 
         private static String encode(String value) {
                 return URLEncoder.encode(value, StandardCharsets.UTF_8);
@@ -164,10 +165,11 @@ public final class PayApiEndpoints {
          * {@link #bulletinByIds}.
          */
         public static final HttpRequestActionBuilder controlerBulletinContratForView = http(
-                        "Controler bulletin contrat")
-                        .get(CONTROLER_BULLETIN_PATH)
-                        .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"))
-                        .check(jsonPath("$[*].bulletinId").findRandom().saveAs("bulletinId"));
+                "Controler bulletin contrat")
+                .get(CONTROLER_BULLETIN_PATH)
+                .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"))
+                .check(jsonPath("$[?(@.bulletinId != null)].bulletinId")
+                        .findRandom().saveAs("bulletinId"));
 
         /** Bulletin calculation summary polled right after the recompute stream. */
         public static final HttpRequestActionBuilder calculationInfo = http("Bulletin calculation info")
@@ -314,8 +316,19 @@ public final class PayApiEndpoints {
                         .headers(ApiHeaders.bearerForAllTenants(
                                         "accept", "application/json, text/plain, */*", "content-type",
                                         "application/json"))
-                                .body(StringBody(
+                        .body(StringBody(
                                         """
                                                         [{"etablissementId":"#{etablissementId}","collectiviteId":"#{collectivite.id}","mois":"#{nextMonth}","etapePaie":7,"statut":"OUVERT"}]
                                                         """));
+
+        public static final HttpRequestActionBuilder editionEtatDeCharge = http("Edition etat de charge")
+                        .get(WERH_API + "/pay/etat-caisse/#{payMonth}/edition?filters={}")
+                        .headers(ApiHeaders.bearerForAllTenants("accept", "application/octet-stream"))
+                        .check(bodyLength().gte(1024));
+
+        public static final HttpRequestActionBuilder organismes = http("Organismes")
+                        .get(WERH_API + "/pay/etat-caisse/organismes")
+                        .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"))
+                        .check(jsonPath("$[0].id").transform(Integer::parseInt).gt(0));
+
 }

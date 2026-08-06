@@ -52,19 +52,18 @@ public final class AgentApiEndpoints {
         public static final HttpRequestActionBuilder contracts = http("Agent contracts")
                         .get(AGENT_LIST_PATH)
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
-//                        .check(
-//                                        jsonPath("$[0].agentId").saveAs("agentId"),
-//                                        jsonPath("$[0].contratId").saveAs("contratId"));
+        // .check(
+        // jsonPath("$[0].agentId").saveAs("agentId"),
+        // jsonPath("$[0].contratId").saveAs("contratId"));
 
-    public static final HttpRequestActionBuilder listeAgents =
-            http("Agent contracts")
-                    .get(WERH_API + "/career/bff/dossier-agent/" + AGENT_LIST_DATE + "/contract")
-                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
-                    .check(jmesPath("[*].{agentId: agentId, contratId: contratId, fonctionId: fonctionId,"
-        + " droitId: droitId, statutId: statutId, collectiviteId: collectiviteId,"
-        + " etablissementId: etablissementId}")
-        .ofList().saveAs("agents"),
-        jsonPath("$[?(@.droitId)]").ofMap().findRandom().saveAs("active_agent"));
+        public static final HttpRequestActionBuilder listeAgents = http("Agent contracts")
+                        .get(WERH_API + "/career/bff/dossier-agent/" + AGENT_LIST_DATE + "/contract")
+                        .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
+                        .check(jmesPath("[*].{agentId: agentId, contratId: contratId, fonctionId: fonctionId,"
+                                        + " droitId: droitId, statutId: statutId, collectiviteId: collectiviteId,"
+                                        + " etablissementId: etablissementId}")
+                                        .ofList().saveAs("agents"),
+                                        jsonPath("$[?(@.droitId)]").ofMap().findRandom().saveAs("active_agent"));
 
         /** Agent latest situation, the first call fired when an agent is opened. */
         public static final HttpRequestActionBuilder latestSituation = http("Agent latest situation")
@@ -102,17 +101,19 @@ public final class AgentApiEndpoints {
                         .get(WERH_API + "/agent/agent/domiciliationBancaire/#{active_agent.agentId}")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
-    /** Contract detail for the selected agent contract. */
-    public static final HttpRequestActionBuilder contratDetail =
-            http("Contract detail")
-                    .get(WERH_API + "/career/contrat/#{active_agent.contratId}")
-                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
-                    .check(jsonPath("$.situations[0].statut_id").saveAs("contratStatutId"))
-            ;
+        /** Contract detail for the selected agent contract. */
+        public static final HttpRequestActionBuilder contratDetail = http("Contract detail")
+                        .get(WERH_API + "/career/contrat/#{active_agent.contratId}")
+                        .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
+                        .check(jsonPath("$.situations[0].statut_id").saveAs("contratStatutId"));
 
-    public static final HttpRequestActionBuilder droitStatus =
-            http("Droit status")
-                    .get(WERH_API + "/career/droit/status/#{contratStatutId}")
-                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+        public static final HttpRequestActionBuilder droitStatus = http("Droit status")
+                        .get(WERH_API + "/career/droit/status/#{contratStatutId}")
+                        .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+        // TODO check for agent with multiple contracts
+        public static final HttpRequestActionBuilder calculBulletin = http("Calculer bulletin")
+                        .post(WERH_API + "/pay/paie/cycle-paie/#{cyclePaieId}/agent/#{active_agent.agentId}/contrat/#{active_agent.contratId}/calculerBulletin")
+                        .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
 }

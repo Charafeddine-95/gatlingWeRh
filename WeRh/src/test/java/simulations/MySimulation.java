@@ -14,6 +14,7 @@ import groups.simulationGroups.AgentBulletinGroup;
 import groups.simulationGroups.AgentListGroup;
 import groups.simulationGroups.ControleBulletinsGroup;
 import groups.simulationGroups.DashboardGroup;
+import groups.simulationGroups.EtatDeChargeGroup;
 import groups.simulationGroups.GcuApprovalGroup;
 import groups.simulationGroups.LoginGroup;
 import groups.simulationGroups.OuverturePaieGroup;
@@ -126,7 +127,10 @@ public class MySimulation extends Simulation {
           pause(2),
           PayAssistantGroup.open,
           pause(3),
-          VisualiserBulletinsGroup.open);
+          VisualiserBulletinsGroup.open,
+          pause(1),
+          EtatDeChargeGroup.open
+        );
 
 
     ScenarioBuilder ouvertureMoisPaie =
@@ -148,6 +152,6 @@ public class MySimulation extends Simulation {
                 })));
 
   {
-    setUp(ouvertureMoisPaie.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(payVisualiserBulletins.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
