@@ -23,11 +23,12 @@ public final class OrdonnancementGroup {
      */
     public static final ChainBuilder open =
             group("Open ordonancement").on(
-                    WebPages.home,
+                    WebPages.Ordonnancement,
                     ExecutionApiEndpoints.chargerExerciceComptable,
                     ExecutionApiEndpoints.fournirListeSerieBordereauxOrdonnancement,
                     ExecutionApiEndpoints.fournirListeLiquidationsCount,
-                    ExecutionApiEndpoints.chargerConfigEditionPiecePourBudget
+                    ExecutionApiEndpoints.chargerConfigEditionPiecePourBudget,
+                    ExecutionApiEndpoints.fournirListeLiquidationsCount
             );
 
 }

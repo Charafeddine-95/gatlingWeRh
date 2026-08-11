@@ -150,6 +150,16 @@ public final class ExecutionApiEndpoints {
                                         "{\"exercice\":{\"id\":#{userContextCBE.exercice.exercice.id},\"marque\":0,\"sourceInformationRatios\":{\"_id\":1,\"_lib\":\"DGCP\",\"@id\":3,\"@type\":\"TypeSourceInformation\"},\"millesime\":#{millesime},\"budgetRef\":{\"id\":1,\"marque\":0,\"collectiviteRef\":{\"id\":1,\"marque\":0,\"@id\":5,\"@type\":\"Collectivite\"},\"@id\":4,\"@type\":\"Budget\"},\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":6,\"@type\":\"NormeComptable\"},\"comptableAssignataireRef\":{\"id\":1,\"marque\":0,\"@id\":7,\"@type\":\"ComptableAssignataire\"},\"@id\":2,\"@type\":\"ExerciceComptable\"},\"sens\":{\"_id\":2,\"_lib\":\"Dépense\",\"@id\":2,\"@type\":\"TypeGestionSens\"},\"pmmvt\":null}"))
                         .check(jmesPath("donnees[0].id").ofInt().gt(0));
 
+
+        public static final HttpRequestActionBuilder majDonneesComboNature = http(
+                "maj donnees combo nature")
+                .post("https://wegf-api.uat.wemagnus.com/compta/UcMandatTitre/majDonneesComboNature")
+                .queryParam("fieldNames[]", "")
+                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                .body(StringBody(
+                        "{\"liq\":{\"id\":17068,\"marque\":0,\"annulatif\":false,\"marchePublic\":{\"id\":0,\"marque\":0,\"@id\":3,\"@type\":\"MarchePublic\"},\"executionBudgetListe\":{\"donnees\":[{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":{\"_id\":0,\"_lib\":\"Normal\",\"@id\":6,\"@type\":\"TypeNormalOuAnnulatif\"},\"etat\":{\"_id\":4,\"_lib\":\"RIEN_A_FAIRE\",\"@id\":7,\"@type\":\"EtatEnum\"},\"reelOuOrdre\":{\"_id\":2,\"_lib\":\"Réel\",\"@id\":8,\"@type\":\"TypeGestionReelOrdre\"},\"compteUtilisateurRef\":{\"id\":1895,\"marque\":0,\"@id\":9,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":10,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":{\"_id\":1,\"_lib\":\"DGCP\",\"@id\":12,\"@type\":\"TypeSourceInformation\"},\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":13,\"@type\":\"NormeComptable\"},\"@id\":11,\"@type\":\"ExerciceComptable\"},\"@id\":5,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":1897,\"marque\":0,\"@id\":15,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":16,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":18,\"@type\":\"NormeComptable\"},\"@id\":17,\"@type\":\"ExerciceComptable\"},\"@id\":14,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":1899,\"marque\":0,\"@id\":20,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":21,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":23,\"@type\":\"NormeComptable\"},\"@id\":22,\"@type\":\"ExerciceComptable\"},\"@id\":19,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":1965,\"marque\":0,\"@id\":25,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":26,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":28,\"@type\":\"NormeComptable\"},\"@id\":27,\"@type\":\"ExerciceComptable\"},\"@id\":24,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":2263,\"marque\":0,\"@id\":30,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":31,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":33,\"@type\":\"NormeComptable\"},\"@id\":32,\"@type\":\"ExerciceComptable\"},\"@id\":29,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":2174,\"marque\":0,\"@id\":35,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":36,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":38,\"@type\":\"NormeComptable\"},\"@id\":37,\"@type\":\"ExerciceComptable\"},\"@id\":34,\"@type\":\"ExecutionBudget\"}],\"@id\":4,\"@type\":\"Association\"},\"codeNature\":{\"_id\":8,\"_lib\":\"Paie\",\"@id\":39,\"@type\":\"TypeNaturePiece\"},\"regularisationTresorerie\":false,\"pieceRecapitulative\":false,\"enPlusieursAnnees\":false,\"@id\":2,\"@type\":\"Liq\"}}"))
+                .check(jmesPath("[0].\"@id\"").ofInt().gt(0));
+
         // Pièces Justificatives
         public static final HttpRequestActionBuilder chargerCollectivte = http(
                         "Charger la collectivité")
@@ -238,6 +248,42 @@ public final class ExecutionApiEndpoints {
                         """
                         {"idBudget":1}           
                          """))
+                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                .check(jmesPath("\"@id\"").ofInt().gt(0));
+
+
+        public static final HttpRequestActionBuilder fournirListeLiquidations = http(
+                "Fournir liste serie Liquidations")
+                .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirListeLiquidations?fieldNames%5B%5D=!liquidationRef.executionBudgetListe%20!liquidationRecetteRef.executionBudgetListe")
+                .body(StringBody(
+                        """
+            {"selCrit":{"id":-1,"marque":0,"exercice":{"id":25,"marque":0,"sourceInformationRatios":{"_id":1,"_lib":"DGCP","@id":4,"@type":"TypeSourceInformation"},"@id":3,"@type":"ExerciceComptable"},"mandatTitre":{"id":0,"marque":0,"@id":5,"@type":"MandatTitre"},"serieBord":{"id":4,"marque":0,"@id":6,"@type":"SerieBordereauLiquidation"},"operateurSelMandat":{"_id":259,"_lib":"égal à or Null","@id":7,"@type":"RechercheOperateurEnum"},"typeMouvement":{"_id":3,"_lib":"Tous","@id":8,"@type":"TypeMouvementATraiter"},"@id":2,"@type":"SelectionLiquidation"}}     
+       """))
+                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                .check(jsonPath("$.donnees[0].id").ofInt().gt(0))
+                .check(jsonPath("$.donnees[*].id").findAll().saveAs("idLiquidation"));
+
+
+        public static final HttpRequestActionBuilder fournirListeBordereauxPreparatoire = http(
+                "Fournir liste bordereaux preparatoire")
+                .post(
+                        "https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirListeBordereauxPreparatoire?fieldNames%5B%5D=**")
+                .body(StringBody(
+                        """
+            {"param":{"listeCriteres":[{"lienClassePersistante":"BordereauPreparatoire","lienAttribut":"liquidationListe.serieBordereauLiquidationRef.id","valeur":4,"operateur":{"_id":3,"_lib":"égal à","@id":4,"@type":"RechercheOperateurEnum"},"@id":3,"@type":"RechercheCritere"}],"listeCriteresRechercheGui":[],"listeAttributs":[],"listeTris":[],"distinct":false,"@id":2,"@type":"RechercheParametres"}}     
+       """))
+                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                .check(jmesPath("\"@id\"").ofInt().gt(0));
+
+
+        public static final HttpRequestActionBuilder fournirTailleLiquidationPourPES = http(
+                "Fournir taille liquidation pour PES")
+                .post(
+                        "https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirTailleLiquidationPourPES?fieldNames%5B%5D=**")
+                .body(StringBody(
+                        """
+            {"liquidationId":#{idLiquidation(0)},"idBudget":1}     
+       """))
                 .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                 .check(jmesPath("\"@id\"").ofInt().gt(0));
 

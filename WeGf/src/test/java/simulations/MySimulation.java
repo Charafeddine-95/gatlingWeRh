@@ -7,15 +7,14 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
-import groups.simulationGroups.DashboardGroup;
-import groups.simulationGroups.ExecutionGroup;
-import groups.simulationGroups.LoginGroup;
+import groups.simulationGroups.*;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
 import endpoints.apiEndpoints.ExecutionApiEndpoints;
-import groups.simulationGroups.OrdonnancementGroup;
+
 import java.time.Duration;
+
 
 public class MySimulation extends Simulation {
 
@@ -92,7 +91,8 @@ public class MySimulation extends Simulation {
           LoginGroup.login,
           pause(Duration.ofMillis(500)),
           DashboardGroup.open,
-          OrdonnancementGroup.open
+          OrdonnancementGroup.open,
+          OrdonnancementSelectionLiquidationsGroup.open
           );
 
           {
