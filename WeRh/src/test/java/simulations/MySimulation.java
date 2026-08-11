@@ -37,6 +37,15 @@ public class MySimulation extends Simulation {
           .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36");
 
   /**
+   * Renews the token shared by all the virtual users. Not injected below because a short run
+   * fits in a single token lifetime — for a run longer than that, add it to setUp next to the
+   * journey and give it a duration that covers the injection profile:
+   * {@code setUp(tokenRefresher.injectOpen(atOnceUsers(1)).protocols(httpProtocol), ...)}.
+   */
+  ScenarioBuilder tokenRefresher =
+      scenario("Token refresh").exec(LoginGroup.keepTokenFresh(Duration.ofMinutes(30)));
+
+  /**
    * First connection of a user: the GCU approval dialog shows up once and has to be
    * accepted. Kept for reference but not injected below — to test it, swap the
    * scenario passed to setUp.

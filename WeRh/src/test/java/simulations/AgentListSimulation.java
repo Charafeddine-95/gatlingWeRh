@@ -26,6 +26,14 @@ public class AgentListSimulation extends Simulation {
           .header("accept-language", "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7")
           .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36");
 
+  /**
+   * Renews the token shared by all the virtual users. Not injected below because a short run
+   * fits in a single token lifetime — for a run longer than that, add it to setUp next to the
+   * journey and give it a duration that covers the injection profile.
+   */
+  ScenarioBuilder tokenRefresher =
+      scenario("Token refresh").exec(LoginGroup.keepTokenFresh(Duration.ofMinutes(30)));
+
   /** Returning user opening the agents list page. */
   ScenarioBuilder agentsList =
       scenario("WeRH agents list").exec(

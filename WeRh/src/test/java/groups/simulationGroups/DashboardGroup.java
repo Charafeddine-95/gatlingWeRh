@@ -7,7 +7,6 @@ import endpoints.apiEndpoints.AuthApiEndpoints;
 import endpoints.apiEndpoints.ContractApiEndpoints;
 import endpoints.apiEndpoints.NotificationApiEndpoints;
 import endpoints.apiEndpoints.ReferentialApiEndpoints;
-import endpoints.webEndpoints.LoginPages;
 import endpoints.webEndpoints.WebPages;
 import io.gatling.javaapi.core.ChainBuilder;
 import java.time.Duration;
@@ -18,18 +17,18 @@ public final class DashboardGroup {
     private DashboardGroup() {
     }
 
-    /** First dashboard load after login: SPA reload, silent SSO, then the initial burst of context/contract/notification calls. */
+    /**
+     * First dashboard load after login: SPA reload, silent SSO, then the initial burst of
+     * context/contract/notification calls. The silent SSO only happens for the virtual user that
+     * actually logged in — see {@link LoginGroup#silentReauthentication}.
+     */
     public static final ChainBuilder open =
             group("Open dashboard").on(
                     WebPages.home,
                     pause(Duration.ofMillis(700)),
-                    LoginPages.generateStateAndNonce,
-                    LoginPages.silentAuthorizationPage,
-                    pause(Duration.ofMillis(700)),
-                    AuthApiEndpoints.exchangeToken
-                            .resources(
-                                    AuthApiEndpoints.userLoginNoTenant,
-                                    ReferentialApiEndpoints.agentConfiguration),
+                    LoginGroup.silentReauthentication,
+                    AuthApiEndpoints.userLoginNoTenant
+                            .resources(ReferentialApiEndpoints.agentConfiguration),
                     pause(1),
                     ContractApiEndpoints.contractExists
                             .resources(
