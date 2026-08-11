@@ -36,6 +36,10 @@ public final class WebPages {
                 .get("https://wegf.uat.wemagnus.com/wegf-mfe-compta/Execution/PieceJustificativeListeFormulaire")
                 .headers(NAVIGATION_HEADERS);
 
+        public static final HttpRequestActionBuilder Ordonnancement = http("ORDONNANCEMENT page")
+                .get("https://wegf.uat.wemagnus.com/wegf-mfe-compta/Execution/Ordonnancement")
+                .headers(NAVIGATION_HEADERS);
+
 
 // mandat webpage
 // https://wegf.uat.wemagnus.com/wegf-mfe-compta/Execution/MandatListeFormulaire/MandatTitreFicheFormulaire/update?t=1785849794723&id=17068&from=MandatListeFormulaire&params=eyJzZW5zIjoyLCJhbm51bGVlUGFydGllbGxlbWVudCI6ImZhbHNlIiwiYW5udWxlZVRvdGFsZW1lbnQiOiJmYWxzZSIsImFubnVsYXRpZiI6ImZhbHNlIiwiZmlsdGVyIjp7ImFubnVsYXRpZiI6ZmFsc2UsImJ1ZGdldGFpcmUiOnRydWUsImludGVybmVzIjpmYWxzZSwibm9uTnVtZXJvdGUiOnRydWUsIm51bWVyb3RlIjpmYWxzZSwiZGViaXRPZmZpY2UiOmZhbHNlLCJmaW5FeG8iOmZhbHNlLCJhZ0dyaWRDb25maWdzdGF0ZSI6eyJmaWx0ZXJzIjp7fSwicXVpY2tTZWFyY2hGaWx0ZXIiOm51bGx9LCJwYWdlU2l6ZSI6MTAsImN1cnJlbnRQYWdlIjowfSwiaWRFeGVyY2ljZSI6MjUsImlkQ29sbGVjdGl2aXRlIjoxfQ&pn=W3sicHJldmlvdXNQYWdlIjoiTWFuZGF0TGlzdGVGb3JtdWxhaXJlIiwiYWN0aW9uIjpudWxsfV0

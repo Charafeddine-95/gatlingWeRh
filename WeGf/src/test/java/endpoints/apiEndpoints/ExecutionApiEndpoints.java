@@ -29,7 +29,9 @@ public final class ExecutionApiEndpoints {
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(
                                         jsonPath("$.budgetRef.id").ofInt().gt(0),
-                                        jmesPath("millesime").saveAs("millesime"));
+                                        jmesPath("millesime").saveAs("millesime"),
+                                        jmesPath("id").saveAs("idExerciceComptable"));
+
 
         // TODO parameters for multiple uses
         public static final HttpRequestActionBuilder fournirListeSerieBordereauxTitre = http(
@@ -204,4 +206,39 @@ public final class ExecutionApiEndpoints {
                                 .get("https://wegf-api.uat.wemagnus.com/compta/engagements?sensId=2&urgent=false&exerciceId=#{userContextCBE.exercice.exercice.id}&solde=false&echeancier=false&colonnes=numeroEngagement%2CtiersComptable.codeAliasPrefTiers%2Cobjet%2CcodeCompteUtilisateur%2CmontantHT%2CmontantTTC%2CmontantResteEngage%2Cdate")
                                 .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                                 .check(jmesPath("data[0].id").exists());
+
+
+
+                        //Ordonnanncement
+                        public static final HttpRequestActionBuilder fournirListeSerieBordereauxOrdonnancement = http(
+                                "Fournir liste serie bordereaux")
+                                .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirListeSeriesBordereaux?fieldNames%5B%5D=**")
+                                .body(StringBody(
+                                        """
+                                                {"param":{"listeCriteres":[{"lienClassePersistante":"SerieBordereauLiquidation","lienAttribut":"sens","valeur":{"_id":1,"_lib":"Dépense et Recette","@id":4,"@type":"TypeGestionSens"},"operateur":{"_id":8,"_lib":"différent de","@id":5,"@type":"RechercheOperateurEnum"},"@id":3,"@type":"RechercheCritere"},{"lienClassePersistante":"SerieBordereauLiquidation","lienAttribut":"compteursBordereauListe.exerciceComptableRef.id","valeur":#{idExerciceComptable},"operateur":{"_id":3,"_lib":"égal à","@id":7,"@type":"RechercheOperateurEnum"},"@id":6,"@type":"RechercheCritere"}],"listeCriteresRechercheGui":[],"listeAttributs":[],"listeTris":[{"croissant":true,"lienClassePersistante":"SerieBordereauLiquidation","lienAttribut":"annulatif","@id":8,"@type":"RechercheTri"},{"croissant":true,"lienClassePersistante":"SerieBordereauLiquidation","lienAttribut":"sens","@id":9,"@type":"RechercheTri"}],"distinct":false,"@id":2,"@type":"RechercheParametres"}}
+                                                """))
+                                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                                .check(jmesPath("donnees[0].id").ofInt().gt(0));
+
+
+                        public static final HttpRequestActionBuilder fournirListeLiquidationsCount = http(
+                                        "Fournir liste serie LiquidationsCount")
+                                                .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirListeLiquidationsCount")
+                                         .body(StringBody(
+                                            """
+                                {"selCrit":{"id":-1,"marque":0,"exercice":{"id":#{idExerciceComptable},"marque":0,"sourceInformationRatios":{"_id":1,"_lib":"DGCP","@id":4,"@type":"TypeSourceInformation"},"@id":3,"@type":"ExerciceComptable"},"mandatTitre":{"id":0,"marque":0,"@id":5,"@type":"MandatTitre"},"operateurSelMandat":{"_id":259,"_lib":"égal à or Null","@id":6,"@type":"RechercheOperateurEnum"},"typeMouvement":{"_id":3,"_lib":"Tous","@id":7,"@type":"TypeMouvementATraiter"},"@id":2,"@type":"SelectionLiquidation"}}     
+                           """))
+                                        .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"));
+
+
+        public static final HttpRequestActionBuilder chargerConfigEditionPiecePourBudget = http(
+                "Charger chargerConfigEditionPiecePourBudget")
+                .post("https://wegf-api.uat.wemagnus.com/compta/UcMandatTitre/chargerConfigEditionPiecePourBudget?fieldNames%5B%5D=**")
+                .body(StringBody(
+                        """
+                        {"idBudget":1}           
+                         """))
+                .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+                .check(jmesPath("\"@id\"").ofInt().gt(0));
+
 }

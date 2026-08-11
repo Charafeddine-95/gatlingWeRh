@@ -14,6 +14,7 @@ import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
 import endpoints.apiEndpoints.ExecutionApiEndpoints;
+import groups.simulationGroups.OrdonnancementGroup;
 import java.time.Duration;
 
 public class MySimulation extends Simulation {
@@ -82,7 +83,20 @@ public class MySimulation extends Simulation {
       ExecutionGroup.Mandat,
       ExecutionGroup.OpenMandat);
 
-  {
-    setUp(Engagements.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
-  }
+
+
+  ScenarioBuilder openOrdonnancement = scenario("WeGF Ordonnancement").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          OrdonnancementGroup.open
+          );
+
+          {
+                  setUp(openOrdonnancement.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+}
+
 }
