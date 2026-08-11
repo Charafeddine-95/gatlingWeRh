@@ -1,0 +1,107 @@
+package endpoints.apiEndpoints;
+
+import static io.gatling.javaapi.core.CoreDsl.jsonPath;
+import static io.gatling.javaapi.http.HttpDsl.http;
+
+import io.gatling.javaapi.http.HttpRequestActionBuilder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+/** Agent page API calls. */
+public final class AgentApiEndpoints {
+
+    private AgentApiEndpoints() {
+    }
+
+    private static final String WEGF_API = "https://wegf-api.uat.wemagnus.com";
+    private static final String AGENT_LIST_DATE = config("wegf.agentListDate", "WEGF_AGENT_LIST_DATE", "2026-06-01");
+    private static final String AGENT_LIST_FILTERS =
+            encode(config("wegf.agentListFilters", "WEGF_AGENT_LIST_FILTERS", "{\"activite\":\"1\"}"));
+
+    private static final String AGENT_LIST_PATH =
+            WEGF_API + "/career/bff/dossier-agent/" + AGENT_LIST_DATE + "/contract?filters=" + AGENT_LIST_FILTERS;
+
+    private static String config(String property, String envVariable, String defaultValue) {
+        String value = System.getProperty(property, System.getenv(envVariable));
+        return value != null ? value : defaultValue;
+    }
+
+    private static String encode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    /** Address types used by the agent search/list filters. */
+    public static final HttpRequestActionBuilder addressTypes =
+            http("Agent address types")
+                    .get(WEGF_API + "/agent/type/adresse")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Civilities used by the agent search/list filters. */
+    public static final HttpRequestActionBuilder civilities =
+            http("Agent civilities")
+                    .get(WEGF_API + "/agent/civilite")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /**
+     * Loads the list of active agent contracts for the configured payroll month, and captures the
+     * first row's agent and contract ids ("agentId"/"contratId") so the agent-detail and payslip
+     * calls can target that agent.
+     */
+    public static final HttpRequestActionBuilder contracts =
+            http("Agent contracts")
+                    .get(AGENT_LIST_PATH)
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
+                    .check(
+                            jsonPath("$[0].agentId").saveAs("agentId"),
+                            jsonPath("$[0].contratId").saveAs("contratId"));
+
+    // ---- Agent detail, fired when an agent is opened from the list ----
+
+    /** Agent latest situation, the first call fired when an agent is opened. */
+    public static final HttpRequestActionBuilder latestSituation =
+            http("Agent latest situation")
+                    .post(WEGF_API + "/career/bff/agents-with-latest-situation/#{agentId}/last")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json", "content-type", "application/json"));
+
+    /** Agent core record (fired as the detail tabs mount). */
+    public static final HttpRequestActionBuilder agentDetail =
+            http("Agent detail")
+                    .get(WEGF_API + "/agent/agent/#{agentId}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Agent identity section. */
+    public static final HttpRequestActionBuilder agentIdentite =
+            http("Agent identite")
+                    .get(WEGF_API + "/agent/agent/identite/#{agentId}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Agent address section. */
+    public static final HttpRequestActionBuilder agentAdresse =
+            http("Agent adresse")
+                    .get(WEGF_API + "/agent/agent/adresse/#{agentId}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Agent birth section. */
+    public static final HttpRequestActionBuilder agentNaissance =
+            http("Agent naissance")
+                    .get(WEGF_API + "/agent/agent/naissance/#{agentId}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Agent contact section. */
+    public static final HttpRequestActionBuilder agentContact =
+            http("Agent contact")
+                    .get(WEGF_API + "/agent/agent/contact/#{agentId}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Agent bank details section. */
+    public static final HttpRequestActionBuilder agentBank =
+            http("Agent bank details")
+                    .get(WEGF_API + "/agent/agent/domiciliationBancaire/#{agentId}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+
+    /** Contract detail for the selected agent contract. */
+    public static final HttpRequestActionBuilder contratDetail =
+            http("Contract detail")
+                    .get(WEGF_API + "/career/contrat/#{contratId}")
+                    .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
+}
