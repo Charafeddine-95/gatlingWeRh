@@ -92,7 +92,8 @@ public class MySimulation extends Simulation {
           pause(Duration.ofMillis(500)),
           DashboardGroup.open,
           OrdonnancementGroup.open,
-          OrdonnancementSelectionLiquidationsGroup.open
+          OrdonnancementSelectionLiquidationsGroup.open,
+          NumerotationGroup.numeroter
           );
 
           {

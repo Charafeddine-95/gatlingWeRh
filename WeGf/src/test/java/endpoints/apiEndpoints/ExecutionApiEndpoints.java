@@ -4,7 +4,10 @@ import static io.gatling.javaapi.core.CoreDsl.jsonPath;
 import static io.gatling.javaapi.core.CoreDsl.StringBody;
 import static io.gatling.javaapi.http.HttpDsl.http;
 
+import io.gatling.javaapi.core.ChainBuilder;
 import io.gatling.javaapi.http.HttpRequestActionBuilder;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import static io.gatling.javaapi.core.CoreDsl.*;
 
 /** Notification API calls. */
@@ -30,7 +33,11 @@ public final class ExecutionApiEndpoints {
                         .check(
                                         jsonPath("$.budgetRef.id").ofInt().gt(0),
                                         jmesPath("millesime").saveAs("millesime"),
-                                        jmesPath("id").saveAs("idExerciceComptable"));
+                                        jmesPath("id").saveAs("idExerciceComptable"),
+                                        // Kept whole: NumerotationApiEndpoints sends this exercice back verbatim,
+                                        // both inside the creerBordereauLiquidation payload and as its own
+                                        // argument on the two signataire calls.
+                                        bodyString().saveAs("exerciceComptableJson"));
 
 
         // TODO parameters for multiple uses
@@ -261,7 +268,33 @@ public final class ExecutionApiEndpoints {
        """))
                 .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                 .check(jsonPath("$.donnees[0].id").ofInt().gt(0))
-                .check(jsonPath("$.donnees[*].id").findAll().saveAs("idLiquidation"));
+                .check(jsonPath("$.donnees[*].id").findAll().saveAs("idLiquidation"))
+                // The grid the user starts from. Sent back whole as liquidationDepartListe when
+                // the bordereau is created, so the response is kept rather than rebuilt.
+                .check(bodyString().saveAs("liquidationsJson"))
+                // Every row, kept as raw JSON so choisirLiquidations can hand a subset of them
+                // straight back to the numerotation calls.
+                .check(jsonPath("$.donnees[*]").findAll().saveAs("liquidationRows"));
+
+        /**
+         * Ticks 1 to 3 liquidations, drawn per iteration, and builds the {@code donnees} array
+         * that the numerotation calls send back ({@code selectionRowsJson}) along with how many
+         * were taken ({@code nbSelection}).
+         *
+         * <p>Takes them from the top of the grid, and never leaves row 0 out. Row 0 is the one
+         * that spells out the enum objects shared by the whole list ({@code etat},
+         * {@code codeNature}, {@code statut}...); the later rows only point at them by
+         * {@code @id}. Any selection that includes row 0 is therefore self-contained and its
+         * rows can be concatenated untouched — verified over every 1-to-3 row combination.
+         * Leave row 0 out and the others arrive with dangling references.
+         */
+        public static final ChainBuilder choisirLiquidations = exec(session -> {
+                List<String> rows = session.getList("liquidationRows");
+                int nb = Math.min(ThreadLocalRandom.current().nextInt(1, 4), rows.size());
+                return session
+                                .set("nbSelection", nb)
+                                .set("selectionRowsJson", String.join(",", rows.subList(0, nb)));
+        });
 
 
         public static final HttpRequestActionBuilder fournirListeBordereauxPreparatoire = http(
@@ -276,14 +309,18 @@ public final class ExecutionApiEndpoints {
                 .check(jmesPath("\"@id\"").ofInt().gt(0));
 
 
+        /**
+         * Sizes the PES flux for one liquidation. The screen calls it once per ticked row, so the
+         * body reads the {@code indexLiquidation} counter of the surrounding repeat rather than a
+         * fixed index — see {@code OrdonnancementSelectionLiquidationsGroup}.
+         */
         public static final HttpRequestActionBuilder fournirTailleLiquidationPourPES = http(
                 "Fournir taille liquidation pour PES")
                 .post(
                         "https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirTailleLiquidationPourPES?fieldNames%5B%5D=**")
-                .body(StringBody(
-                        """
-            {"liquidationId":#{idLiquidation(0)},"idBudget":1}     
-       """))
+                .body(StringBody(session -> "{\"liquidationId\":"
+                        + session.getList("idLiquidation").get(session.getInt("indexLiquidation"))
+                        + ",\"idBudget\":1}"))
                 .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                 .check(jmesPath("\"@id\"").ofInt().gt(0));
 
