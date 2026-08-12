@@ -37,7 +37,14 @@ public final class ExecutionApiEndpoints {
                                         // Kept whole: NumerotationApiEndpoints sends this exercice back verbatim,
                                         // both inside the creerBordereauLiquidation payload and as its own
                                         // argument on the two signataire calls.
-                                        bodyString().saveAs("exerciceComptableJson"));
+                                        bodyString().saveAs("exerciceComptableJson"),
+                                        // The dossier EditionTransfertApiEndpoints files points at the budget and
+                                        // the collectivite of that same exercice by @id. Read here rather than
+                                        // assumed, since where they land depends on how the API numbers the
+                                        // response.
+                                        jsonPath("$.budgetRef['@id']").saveAs("exerciceBudgetRefId"),
+                                        jsonPath("$.budgetRef.collectiviteRef['@id']")
+                                                        .saveAs("exerciceCollectiviteRefId"));
 
 
         // TODO parameters for multiple uses

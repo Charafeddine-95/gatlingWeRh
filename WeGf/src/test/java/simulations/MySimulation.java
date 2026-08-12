@@ -96,6 +96,23 @@ public class MySimulation extends Simulation {
           NumerotationGroup.numeroter
           );
 
+  /**
+   * The other way through the ordonnancement screen: instead of numbering liquidations into a
+   * new bordereau, tick bordereaux that already exist and generate their PES flux.
+   */
+  ScenarioBuilder editionTransfertBordereaux = scenario("WeGF Edition transfert bordereaux").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          OrdonnancementGroup.open,
+          pause(Duration.ofMillis(500)),
+          OrdonnancementEditionTransfertGroup.open,
+          pause(1),
+          OrdonnancementEditionTransfertGroup.genererFluxPES);
+
           {
                   setUp(openOrdonnancement.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
 }
