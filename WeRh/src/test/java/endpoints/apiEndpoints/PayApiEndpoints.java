@@ -331,4 +331,8 @@ public final class PayApiEndpoints {
                         .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"))
                         .check(jsonPath("$[0].id").transform(Integer::parseInt).gt(0));
 
+        public static final HttpRequestActionBuilder bordereau = http("Bordereau")
+                        .get(WERH_API + "/pay/bordereaux-urssaf/#{payMonth}?filters=%7B%7D")
+                        .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
 }

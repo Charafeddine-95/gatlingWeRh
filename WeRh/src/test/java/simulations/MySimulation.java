@@ -160,7 +160,29 @@ public class MySimulation extends Simulation {
                     return session;
                 })));
 
+      ScenarioBuilder payVisualiserBulletinsEtatCaisseBordereau =
+      scenario("WeRH pay visualiser bulletins").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          pause(2),
+          PayAssistantGroup.open,
+          pause(3),
+          VisualiserBulletinsGroup.open,
+          pause(1),
+          EtatDeChargeGroup.open,
+          pause(1),
+          doIfOrElse(session -> session.contains("nextMonth"))
+                .then(EtatDeChargeGroup.bordereauUrssaf)
+                .orElse(exec(session -> {
+                    System.out.println(">>> nextMonth absent — ouverture ignorée");
+                    return session;
+                })));
+
   {
-    setUp(payVisualiserBulletins.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(payVisualiserBulletinsEtatCaisseBordereau.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
