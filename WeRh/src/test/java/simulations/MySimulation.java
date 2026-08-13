@@ -10,6 +10,7 @@ import static io.gatling.javaapi.core.CoreDsl.exec;
 
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
+import endpoints.apiEndpoints.PayApiEndpoints;
 import groups.simulationGroups.*;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
@@ -150,6 +151,33 @@ public class MySimulation extends Simulation {
                     return session;
                 })));
 
+      ScenarioBuilder payVisualiserBulletinsEtatCaisseBordereau =
+      scenario("WeRH pay visualiser bulletins").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          pause(2),
+          PayAssistantGroup.open,
+          pause(3),
+          VisualiserBulletinsGroup.open,
+          pause(1),
+          EtatDeChargeGroup.open,
+          pause(1),
+          PayApiEndpoints.spreadActiveCycle,
+          pause(1),
+          PayApiEndpoints.computeNextMonth,
+          doIfOrElse(session -> session.contains("moisOuvertTrue"))
+                .then(EtatDeChargeGroup.bordereauUrssaf)
+                .orElse(exec(session -> {
+                    System.out.println(">>> un mois n'a pas été ouvert");
+                    return session;
+                })));
+
+  {
+    setUp(payVisualiserBulletinsEtatCaisseBordereau.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   ScenarioBuilder createAgent =
           scenario("Create agent").exec(
                   ApiHeaders.initTenants,

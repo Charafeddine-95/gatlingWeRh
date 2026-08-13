@@ -51,7 +51,7 @@ public final class PayApiEndpoints {
                 String ouvert = session.getString("payOnlyMonth");
                 String cloture = session.getString("closedOnlyMonth");
                 if (ouvert == null || !ouvert.equals(cloture)) {
-                        return session;
+                        return session.set("moisOuvertTrue", ouvert);
                 }
                 try {
                         return session.set("nextMonth", YearMonth.parse(ouvert).plusMonths(1).toString());
@@ -330,5 +330,9 @@ public final class PayApiEndpoints {
                         .get(WERH_API + "/pay/etat-caisse/organismes")
                         .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"))
                         .check(jsonPath("$[0].id").transform(Integer::parseInt).gt(0));
+
+        public static final HttpRequestActionBuilder bordereau = http("Bordereau")
+                        .get(WERH_API + "/pay/bordereaux-urssaf/#{payMonth}?filters=%7B%7D")
+                        .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
 
 }

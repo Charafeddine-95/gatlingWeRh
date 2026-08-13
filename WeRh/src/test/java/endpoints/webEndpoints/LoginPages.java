@@ -71,12 +71,23 @@ public final class LoginPages {
                     + "&response_mode=fragment&response_type=code&scope=openid"
                     + "&nonce=#{nonce}";
 
+    /**
+     * Fails fast when a credential is missing: posting an empty username/password makes
+     * Keycloak answer "utilisateur ou mot de passe non valide", which looks like a wrong
+     * account rather than an unset variable.
+     */
     private static String credential(String property, String envVariable) {
         String value = System.getProperty(property, System.getenv(envVariable));
-        if (value == null) {
+        if (value == null || value.isBlank()) {
             value = DOT_ENV.get(envVariable);
         }
-        return value != null ? value : "";
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "Missing credential: set the system property -D" + property
+                            + ", the environment variable " + envVariable
+                            + ", or " + envVariable + "= in the .env file at the project root.");
+        }
+        return value;
     }
 
     /** KEY=VALUE lines of the optional .env file at the project root; # starts a comment. */
