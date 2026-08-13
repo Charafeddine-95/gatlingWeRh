@@ -10,17 +10,7 @@ import static io.gatling.javaapi.core.CoreDsl.exec;
 
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
-import groups.simulationGroups.AgentBulletinGroup;
-import groups.simulationGroups.AgentListGroup;
-import groups.simulationGroups.ControleBulletinsGroup;
-import groups.simulationGroups.DashboardGroup;
-import groups.simulationGroups.EtatDeChargeGroup;
-import groups.simulationGroups.GcuApprovalGroup;
-import groups.simulationGroups.LoginGroup;
-import groups.simulationGroups.OuverturePaieGroup;
-import groups.simulationGroups.PayAssistantGroup;
-import groups.simulationGroups.RecalculBulletinsGroup;
-import groups.simulationGroups.VisualiserBulletinsGroup;
+import groups.simulationGroups.*;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
@@ -160,7 +150,17 @@ public class MySimulation extends Simulation {
                     return session;
                 })));
 
+  ScenarioBuilder createAgent =
+          scenario("Create agent").exec(
+                  ApiHeaders.initTenants,
+                  WebPages.home,
+                  pause(1),
+                  LoginGroup.login,
+                  pause(Duration.ofMillis(500)),
+                  CreateAgentGroup.open
+          );
+
   {
-    setUp(payVisualiserBulletins.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    setUp(createAgent.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
   }
 }
