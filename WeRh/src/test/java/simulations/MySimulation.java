@@ -10,6 +10,7 @@ import static io.gatling.javaapi.core.CoreDsl.exec;
 
 import endpoints.apiEndpoints.ApiHeaders;
 import endpoints.webEndpoints.WebPages;
+import endpoints.apiEndpoints.PayApiEndpoints;
 import groups.simulationGroups.AgentBulletinGroup;
 import groups.simulationGroups.AgentListGroup;
 import groups.simulationGroups.ControleBulletinsGroup;
@@ -175,10 +176,13 @@ public class MySimulation extends Simulation {
           pause(1),
           EtatDeChargeGroup.open,
           pause(1),
-          doIfOrElse(session -> session.contains("nextMonth"))
+          PayApiEndpoints.spreadActiveCycle,
+          pause(1),
+          PayApiEndpoints.computeNextMonth,
+          doIfOrElse(session -> session.contains("moisOuvertTrue"))
                 .then(EtatDeChargeGroup.bordereauUrssaf)
                 .orElse(exec(session -> {
-                    System.out.println(">>> nextMonth absent — ouverture ignorée");
+                    System.out.println(">>> un mois n'a pas été ouvert");
                     return session;
                 })));
 
