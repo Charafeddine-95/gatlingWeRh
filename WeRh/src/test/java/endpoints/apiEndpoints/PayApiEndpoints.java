@@ -51,10 +51,7 @@ public final class PayApiEndpoints {
                 String ouvert = session.getString("payOnlyMonth");
                 String cloture = session.getString("closedOnlyMonth");
                 if (ouvert == null || !ouvert.equals(cloture)) {
-                        session.set("moisOuvertTrue", ouvert);
-                        System.out.println("ouvert: " + ouvert);
-                        System.out.println("cloture: " + cloture);
-                        return session;
+                        return session.set("moisOuvertTrue", ouvert);
                 }
                 try {
                         return session.set("nextMonth", YearMonth.parse(ouvert).plusMonths(1).toString());
