@@ -37,4 +37,7 @@ public final class EtatDeChargeGroup {
             PayApiEndpoints.organismes,
             PayApiEndpoints.cycleResume,
             PayApiEndpoints.dateRange);
+
+    public static final ChainBuilder bordereauUrssaf = group("Affiche Bordereau URSSAF").on(
+            PayApiEndpoints.bordereau);
 }
