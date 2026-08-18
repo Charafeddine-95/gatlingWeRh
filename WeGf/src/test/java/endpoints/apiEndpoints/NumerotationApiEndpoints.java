@@ -286,15 +286,28 @@ public final class NumerotationApiEndpoints {
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("\"@id\"").ofInt().gt(0));
 
-        /** Valid accounting-norm periods, keyed on the exercice's millesime. */
+        /**
+         * Valid accounting-norm periods, keyed on the exercice's millesime and on its assigning
+         * accountant.
+         *
+         * <p>{@code idComptable} has to be correlated: the server filters the CA_NC rows on it and
+         * answers an empty {@code donnees} for a comptable that does not exist on the tenant, which
+         * surfaces as "can't compare nothing and 0" on the check below rather than as an HTTP error.
+         * It comes from {@code chargerExerciceComptable}. {@code idNormeComptable} stays hardcoded:
+         * -310 is a negative id, so a shared referential row rather than tenant data.
+         */
         public static final HttpRequestActionBuilder fournirListeCA_NCValide = http(
                         "Fournir liste CA_NC valide")
                         .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirListeCA_NCValide?fieldNames%5B%5D=**")
                         .body(StringBody("""
-                                        {"idComptable":1,"millesime":#{millesime},"idNormeComptable":-310}
+                                        {"idComptable":#{idComptable},"millesime":#{millesime},"idNormeComptable":-310}
                                         """))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
-                        .check(jmesPath("donnees[0].id").ofInt().gt(0));
+                        .check(jmesPath("donnees[0].id").ofInt().gt(0))
+                        // Kept whole: the generation payload sends the PES row of this list back as
+                        // its ca_nc, instead of carrying one tenant's copy of it — see
+                        // EditionBordereauApiEndpoints.preparerCorpsGeneration.
+                        .check(bodyString().saveAs("caNcListeJson"));
 
         /** PES signing circuits. Returns an empty list on this tenant. */
         public static final HttpRequestActionBuilder chargerListeCircuit = http(
