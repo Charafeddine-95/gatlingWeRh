@@ -12,16 +12,30 @@ public class MandatApiEndpoints {
     private MandatApiEndpoints() {
     }
 
-    // id":17068 should be fetched from a previous request
+    // The liquidation to open is picked at random by ExecutionApiEndpoints.liquidationsMandat
+    // (saved as liqId); a recorded id is exercice- and tenant-scoped and answers 500 elsewhere.
     public static final HttpRequestActionBuilder chargerLiqComplet = http(
             "Charger Liq Complet")
             .post("https://wegf-api.uat.wemagnus.com/compta/UcMandatTitre/chargerLiqComplet?fieldNames%5B%5D=**,!**.executionBudgetListe.**.exerciceComptableRef.de_Axe1,!**.executionBudgetListe.**.exerciceComptableRef.de_Axe2")
             .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
             .body(StringBody(
                     """
-                                {"id":17068,"idExercice":#{userContextCBE.exercice.exercice.id},"type":{"_id":2,"_lib":"Dépense","@id":2,"@type":"TypeGestionSens"},"liquidationAreduire":false,"liquidationSimple":false,"serieBordereauLiquidationId":null,"bordereauPreparatoireId":null,"objet":null,"recrediterEngagement":false,"pjSelectionneeListe":{"donnees":[],"@id":2,"@type":"Association"},"annulerSurExSuivant":false}
+                                {"id":#{liqId},"idExercice":#{userContextCBE.exercice.exercice.id},"type":{"_id":2,"_lib":"Dépense","@id":2,"@type":"TypeGestionSens"},"liquidationAreduire":false,"liquidationSimple":false,"serieBordereauLiquidationId":null,"bordereauPreparatoireId":null,"objet":null,"recrediterEngagement":false,"pjSelectionneeListe":{"donnees":[],"@id":2,"@type":"Association"},"annulerSurExSuivant":false}
                             """))
-            .check(jmesPath("type._id").ofInt().gt(0));
+            .check(jmesPath("type._id").ofInt().gt(0),
+                    // The execution budget lines belong to this liquidation: their compte
+                    // utilisateur and activite a financer are tenant data (4949 / 2051 on
+                    // tenant 1), not referential. majDonneesComboNature sends them back, and
+                    // the API answers 500 ("cu is null") on an id from another tenant.
+                    jmesPath("liq.executionBudgetListe.donnees[0].id").saveAs("liqExecutionId"),
+                    jmesPath("liq.executionBudgetListe.donnees[0].compteUtilisateurRef.id")
+                            .saveAs("liqCompteUtilisateurId"),
+                    jmesPath("liq.executionBudgetListe.donnees[0].activiteAFinancer.id")
+                            .saveAs("liqActiviteAFinancerId"),
+                    // Nature of the piece: "Paie" in the recording, "Régularisation" on the
+                    // liquidation picked here — sent back as the combo's current selection.
+                    jmesPath("liq.codeNature._id").saveAs("liqCodeNatureId"),
+                    jmesPath("liq.codeNature._lib").saveAs("liqCodeNatureLib"));
 
     public static final HttpRequestActionBuilder chargerAxeAnalitique = http(
             "Charger Axe Analitique")
@@ -66,7 +80,7 @@ public class MandatApiEndpoints {
 
     public static final HttpRequestActionBuilder executionsBudget = http(
             "Executions budget")
-            .get("https://wegf-api.uat.wemagnus.com/compta/liquidations/17068/executions-budgets")
+            .get("https://wegf-api.uat.wemagnus.com/compta/liquidations/#{liqId}/executions-budgets")
             .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
             .check(jmesPath("data[0].attributes.annuleeTotalement").exists());
 
@@ -91,12 +105,34 @@ public class MandatApiEndpoints {
                             """))
             .check(jmesPath("\"@id\"").ofInt().gt(0));
 
+    // The recording sent the six execution lines of a "Paie" liquidation, with the compte
+    // utilisateur, activite a financer and exercice ids of that tenant. Rebuilt here around
+    // the single line of the liquidation chargerLiqComplet just loaded: the @id numbers are
+    // this payload's own numbering (1 is the request root), so they stay sequential and
+    // self-contained instead of pointing at nodes that only existed in the recording.
     public static final HttpRequestActionBuilder majDonneesComboNature = http(
             "maj donnees combo nature")
             .post("https://wegf-api.uat.wemagnus.com/compta/UcMandatTitre/majDonneesComboNature")
             .queryParam("fieldNames[]", "")
             .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
             .body(StringBody(
-                    "{\"liq\":{\"id\":#{liqId},\"marque\":0,\"annulatif\":false,\"marchePublic\":{\"id\":0,\"marque\":0,\"@id\":3,\"@type\":\"MarchePublic\"},\"executionBudgetListe\":{\"donnees\":[{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":{\"_id\":0,\"_lib\":\"Normal\",\"@id\":6,\"@type\":\"TypeNormalOuAnnulatif\"},\"etat\":{\"_id\":4,\"_lib\":\"RIEN_A_FAIRE\",\"@id\":7,\"@type\":\"EtatEnum\"},\"reelOuOrdre\":{\"_id\":2,\"_lib\":\"Réel\",\"@id\":8,\"@type\":\"TypeGestionReelOrdre\"},\"compteUtilisateurRef\":{\"id\":1895,\"marque\":0,\"@id\":9,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":10,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":{\"_id\":1,\"_lib\":\"DGCP\",\"@id\":12,\"@type\":\"TypeSourceInformation\"},\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":13,\"@type\":\"NormeComptable\"},\"@id\":11,\"@type\":\"ExerciceComptable\"},\"@id\":5,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":1897,\"marque\":0,\"@id\":15,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":16,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":18,\"@type\":\"NormeComptable\"},\"@id\":17,\"@type\":\"ExerciceComptable\"},\"@id\":14,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":1899,\"marque\":0,\"@id\":20,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":21,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":23,\"@type\":\"NormeComptable\"},\"@id\":22,\"@type\":\"ExerciceComptable\"},\"@id\":19,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":1965,\"marque\":0,\"@id\":25,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":26,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":28,\"@type\":\"NormeComptable\"},\"@id\":27,\"@type\":\"ExerciceComptable\"},\"@id\":24,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":2263,\"marque\":0,\"@id\":30,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":31,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":33,\"@type\":\"NormeComptable\"},\"@id\":32,\"@type\":\"ExerciceComptable\"},\"@id\":29,\"@type\":\"ExecutionBudget\"},{\"id\":-1,\"marque\":0,\"typeNormalOuAnnulatif\":6,\"etat\":7,\"reelOuOrdre\":8,\"compteUtilisateurRef\":{\"id\":2174,\"marque\":0,\"@id\":35,\"@type\":\"CompteUtilisateur\"},\"activiteAFinancer\":{\"id\":12,\"marque\":0,\"@id\":36,\"@type\":\"ActiviteAFinancer\"},\"exerciceComptableRef\":{\"id\":25,\"marque\":0,\"sourceInformationRatios\":12,\"normeComptableRef\":{\"id\":-310,\"marque\":0,\"@id\":38,\"@type\":\"NormeComptable\"},\"@id\":37,\"@type\":\"ExerciceComptable\"},\"@id\":34,\"@type\":\"ExecutionBudget\"}],\"@id\":4,\"@type\":\"Association\"},\"codeNature\":{\"_id\":8,\"_lib\":\"Paie\",\"@id\":39,\"@type\":\"TypeNaturePiece\"},\"regularisationTresorerie\":false,\"pieceRecapitulative\":false,\"enPlusieursAnnees\":false,\"@id\":2,\"@type\":\"Liq\"}}"))
+                    """
+                            {"liq":{"id":#{liqId},"marque":0,"annulatif":false,\
+                            "marchePublic":{"id":0,"marque":0,"@id":3,"@type":"MarchePublic"},\
+                            "executionBudgetListe":{"donnees":[{"id":#{liqExecutionId},"marque":0,\
+                            "typeNormalOuAnnulatif":{"_id":0,"_lib":"Normal","@id":6,"@type":"TypeNormalOuAnnulatif"},\
+                            "etat":{"_id":4,"_lib":"RIEN_A_FAIRE","@id":7,"@type":"EtatEnum"},\
+                            "reelOuOrdre":{"_id":2,"_lib":"Réel","@id":8,"@type":"TypeGestionReelOrdre"},\
+                            "compteUtilisateurRef":{"id":#{liqCompteUtilisateurId},"marque":0,"@id":9,"@type":"CompteUtilisateur"},\
+                            "activiteAFinancer":{"id":#{liqActiviteAFinancerId},"marque":0,"@id":10,"@type":"ActiviteAFinancer"},\
+                            "exerciceComptableRef":{"id":#{userContextCBE.exercice.exercice.id},"marque":0,\
+                            "sourceInformationRatios":{"_id":1,"_lib":"DGCP","@id":12,"@type":"TypeSourceInformation"},\
+                            "normeComptableRef":{"id":-310,"marque":0,"@id":13,"@type":"NormeComptable"},\
+                            "@id":11,"@type":"ExerciceComptable"},\
+                            "@id":5,"@type":"ExecutionBudget"}],"@id":4,"@type":"Association"},\
+                            "codeNature":{"_id":#{liqCodeNatureId},"_lib":"#{liqCodeNatureLib}","@id":14,"@type":"TypeNaturePiece"},\
+                            "regularisationTresorerie":false,"pieceRecapitulative":false,\
+                            "enPlusieursAnnees":false,"@id":2,"@type":"Liq"}}
+                            """))
             .check(jmesPath("[0].\"@id\"").ofInt().gt(0));
 }
