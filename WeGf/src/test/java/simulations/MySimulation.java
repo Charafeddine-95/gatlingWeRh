@@ -96,8 +96,53 @@ public class MySimulation extends Simulation {
           NumerotationGroup.numeroter
           );
 
+  /**
+   * Read-only pass over the "Edition de bordereau" tab: opens the ordonnancement screen, then
+   * lists the bordereaux already created with their amounts, ticks 1 to 3 of them and renders
+   * the edition panel on the selection.
+   *
+   * <p>Stops short of the numerotation flow on purpose — this one writes nothing, so it can be
+   * replayed as often as needed. It skips {@code OrdonnancementSelectionLiquidationsGroup.open}
+   * too: the edition tab correlates only from {@code OrdonnancementGroup.open} (the exercice
+   * comptable) and from its own bordereaux grid, so leaving the liquidation ticks out keeps a
+   * failure pointing at the edition calls.
+   */
+  ScenarioBuilder editionBordereau = scenario("WeGF Edition bordereau").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          OrdonnancementGroup.open,
+          pause(Duration.ofMillis(500)),
+          OrdonnancementSelectionLiquidationsGroup.editionBordereau
+          );
+
+  /**
+   * Same journey as {@code editionBordereau}, carried through to the PES flux: opens the edition
+   * tab, ticks 1 to 3 bordereaux, then generates.
+   *
+   * <p>This one writes — each pass creates a real dossier PES Aller and marks the ticked
+   * bordereaux as generated. Since the ticks are taken from the top of the grid, repeated passes
+   * hit the same bordereaux, so treat the first pass as the reference measurement.
+   */
+  ScenarioBuilder genererBordereau = scenario("WeGF Generer bordereau").exec(
+          ApiHeaders.initTenants,
+          WebPages.home,
+          pause(1),
+          LoginGroup.login,
+          pause(Duration.ofMillis(500)),
+          DashboardGroup.open,
+          OrdonnancementGroup.open,
+          pause(Duration.ofMillis(500)),
+          OrdonnancementSelectionLiquidationsGroup.editionBordereau,
+          pause(Duration.ofMillis(500)),
+          OrdonnancementSelectionLiquidationsGroup.genererBordereau
+          );
+
           {
-                  setUp(openOrdonnancement.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+                  setUp(genererBordereau.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
 }
 
 }
