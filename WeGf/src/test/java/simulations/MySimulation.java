@@ -141,8 +141,27 @@ public class MySimulation extends Simulation {
           OrdonnancementSelectionLiquidationsGroup.genererBordereau
           );
 
-          {
-                  setUp(genererBordereau.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
-}
+    ScenarioBuilder tiers = scenario("WeGF Liste Tiers").exec(
+            ApiHeaders.initTenants,
+            WebPages.home,
+            pause(1),
+            LoginGroup.login,
+            pause(Duration.ofMillis(500)),
+            DashboardGroup.open,
+            TiersGroup.open);
 
+    ScenarioBuilder ficheTiers = scenario("WeGF Fiche Tiers").exec(
+            ApiHeaders.initTenants,
+            WebPages.home,
+            pause(1),
+            LoginGroup.login,
+            pause(Duration.ofMillis(500)),
+            DashboardGroup.open,
+            TiersGroup.open,
+            TiersGroup.openFiche);
+
+
+    {
+        setUp(ficheTiers.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    }
 }
