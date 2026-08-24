@@ -174,7 +174,7 @@ public class MySimulation extends Simulation {
     );
 
     {
-        setUp(genererBordereau.injectOpen(atOnceUsers(3)).protocols(httpProtocol));
+        setUp(genererBordereau.injectOpen(atOnceUsers(10)).protocols(httpProtocol));
     }
 
 }
