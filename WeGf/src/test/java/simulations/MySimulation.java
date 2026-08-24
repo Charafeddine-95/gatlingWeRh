@@ -30,6 +30,15 @@ public class MySimulation extends Simulation {
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36");
 
   /**
+   * Renews the token shared by all the virtual users. Not injected below because a short run
+   * fits in a single token lifetime — for a run longer than that, add it to setUp next to the
+   * journey and give it a duration that covers the injection profile:
+   * {@code setUp(tokenRefresher.injectOpen(atOnceUsers(1)).protocols(httpProtocol), ...)}.
+   */
+  ScenarioBuilder tokenRefresher =
+      scenario("Token refresh").exec(LoginGroup.keepTokenFresh(Duration.ofMinutes(30)));
+
+  /**
    * Returning user opening the pay assistant, preparing the pay, then viewing the
    * payslips and
    * opening one random agent's bulletin — rendered as a PDF — to check it returns
