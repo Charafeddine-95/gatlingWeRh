@@ -141,8 +141,20 @@ public class MySimulation extends Simulation {
           OrdonnancementSelectionLiquidationsGroup.genererBordereau
           );
 
-          {
-                  setUp(genererBordereau.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
-}
+
+
+    ScenarioBuilder grandLivre = scenario("WeGF Grnad livre").exec(
+            ApiHeaders.initTenants,
+            WebPages.home,
+            pause(1),
+            LoginGroup.login,
+            pause(Duration.ofMillis(500)),
+            DashboardGroup.open,
+            EditionGroup.open
+    );
+
+    {
+        setUp(grandLivre.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+    }
 
 }
