@@ -225,7 +225,7 @@ public final class NumerotationApiEndpoints {
                                         "{\"param\":{\"listeCriteres\":[],\"listeCriteresRechercheGui\":[],\"listeAttributs\":[],\"listeTris\":[],\"distinct\":false,\"paginatorValues\":{\"length\":1000,\"pageIndex\":0,\"pageSize\":1000,\"previousPageIndex\":0},\"@id\":2,\"@type\":\"RechercheParametres\"},"
                                                         + "\"sortValue\":{\"active\":\"tiers\",\"direction\":\"asc\"},"
                                                         + "\"bordereaux\":" + bordereauListe("TableauEntitePersistante")
-                                                        + ",\"idBudget\":1}"))
+                                                        + ",\"idBudget\":#{idBudget}}"))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("\"@id\"").ofInt().gt(0));
 
@@ -237,7 +237,7 @@ public final class NumerotationApiEndpoints {
                         "Fournir signataire actif collectivite")
                         .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirSignataireActifCollectiteByCollectiviteId?fieldNames%5B%5D=**")
                         .body(StringBody("{\"bordereauListe\":" + bordereauListe("Association")
-                                        + ",\"idCollectivite\":1,\"exerciceComptable\":#{exerciceComptableJson}}"))
+                                        + ",\"idCollectivite\":#{userContextCBE.exercice.collectivite.id},\"exerciceComptable\":#{exerciceComptableJson}}"))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("\"@id\"").ofInt().gt(0));
 

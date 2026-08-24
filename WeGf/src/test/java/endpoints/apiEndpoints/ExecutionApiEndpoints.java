@@ -266,7 +266,7 @@ public final class ExecutionApiEndpoints {
                         .post("https://wegf-api.uat.wemagnus.com/compta/UcMandatTitre/chargerConfigEditionPiecePourBudget?fieldNames%5B%5D=**")
                         .body(StringBody(
                                         """
-                                                        {"idBudget":1}
+                                                        {"idBudget":#{idBudget}}
                                                          """))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("\"@id\"").ofInt().gt(0));
@@ -338,7 +338,7 @@ public final class ExecutionApiEndpoints {
                                         "https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirTailleLiquidationPourPES?fieldNames%5B%5D=**")
                         .body(StringBody(session -> "{\"liquidationId\":"
                                         + session.getList("idLiquidation").get(session.getInt("indexLiquidation"))
-                                        + ",\"idBudget\":1}"))
+                                        + ",\"idBudget\":" + session.getInt("idBudget") + "}"))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("\"@id\"").ofInt().gt(0));
 
