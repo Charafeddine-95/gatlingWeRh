@@ -138,8 +138,9 @@ public final class ExecutionApiEndpoints {
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("donnees[0].id").ofInt().gt(0));
 
-        // TODO : Randomize the liqID we pick instead of picking the first one of the
-        // response
+        // JSON:API shape: the list hangs off "data", not the "donnees" envelope the
+        // UseCaseTechnique/chargerListe calls answer with. jsonPath (not jmesPath, which
+        // is single-value) so findRandom picks one liquidation out of the whole page.
         public static final HttpRequestActionBuilder liquidationsMandat = http("Liquidations titre")
                         .get("https://wegf-api.uat.wemagnus.com/compta/liquidations")
                         .queryParam("fields[liquidations]", LIQUIDATIONS_FIELDS)
@@ -153,7 +154,7 @@ public final class ExecutionApiEndpoints {
                         .queryParam("filter[finExo]", false)
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("data[0].id").ofInt().gt(0),
-                                        jsonPath("$.donnees[0].id").findRandom().saveAs("liqId"));
+                                        jsonPath("$.data[*].id").findRandom().saveAs("liqId"));
 
         // TODO Hardcoded values for now, need to know where does the values come from
         public static final HttpRequestActionBuilder chargerListeBordereauPreparatoireMandat = http(
