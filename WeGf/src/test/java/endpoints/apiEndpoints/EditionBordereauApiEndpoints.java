@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,32 +71,43 @@ public final class EditionBordereauApiEndpoints {
         }
 
         /**
-         * Ticks 1 to 3 bordereaux out of the grid and builds the two shapes the calls below
-         * need: the rows themselves ({@code selectionBordereauxJson}, spliced into
-         * {@link #bordereauListe}) and their ids alone ({@code selectionBordereauIds}, for the
-         * two calls that take a bare id array). {@code nbSelectionBordereau} is how many were
-         * taken, which drives the {@code fournirTailleBordereauPourPES} loop.
+         * Ticks the bordereau this virtual user owns and builds the two shapes the calls below
+         * need: the row itself ({@code selectionBordereauxJson}, spliced into
+         * {@link #bordereauListe}) and its id alone ({@code selectionBordereauIds}, for the two
+         * calls that take a bare id array). {@code nbSelectionBordereau} is how many were taken,
+         * which drives the {@code fournirTailleBordereauPourPES} loop.
          *
-         * <p>Takes them from the top of the grid, in order. The rows are handed back with the
-         * {@code @id}s the grid gave them, and a row only ever points at an object written out
-         * by an earlier row — checked over all 59 rows of the recorded grid — so any prefix is
-         * self-contained and the rows can be concatenated untouched. An arbitrary subset is not:
-         * rows 1..16 of the recording share the signataire written out by row 0, rows 18+ share
-         * a different one written out by row 17, so e.g. {row 0, row 20} would arrive with a
-         * dangling reference.
+         * <p>Takes the whole page, because the page is already this user's own single bordereau:
+         * {@code ExecutionApiEndpoints.reserverBordereau} gives every user a {@code pageIndex} of
+         * its own and the grid is asked with a page size of 1. That is what keeps two concurrent
+         * users off the same bordereau — ticking from the top of a full grid had them all land on
+         * row 0, and the API answered ERR_ACCES_CONCURRENT_MODIF on
+         * {@link #processModifierBordereauListe} and a SQL Server deadlock (500) on
+         * {@link #envoyerNouveauDossierExecutionPlusTard}.
+         *
+         * <p>Letting the server paginate also sidesteps the {@code @id} problem that made an
+         * arbitrary row unusable: a row only ever points at an object written out by an earlier
+         * row, so lifting row 20 out of a full page leaves it with dangling references, and only
+         * a prefix could be taken. A one-row page is written out self-contained.
          *
          * <p>Also compacts {@code exerciceComptableJson} in place — see {@link #compact}. Must
          * run after {@code ExecutionApiEndpoints.fournirListeBordereauxAvecMontant}, whose
          * response it reads.
          */
         public static final ChainBuilder choisirBordereaux = exec(session -> {
+                // An empty page fails the grid checks, so the rows never reach the session at
+                // all; caught here rather than as "No attribute named bordereauRows".
+                if (!session.contains("bordereauRows")) {
+                        throw new IllegalStateException("page " + session.getInt("slotBordereau")
+                                        + " de la grille vide: il y a moins de bordereaux disponibles que"
+                                        + " d'utilisateurs virtuels");
+                }
                 List<String> rows = session.getList("bordereauRows");
                 List<String> ids = session.getList("idBordereaux");
-                int nb = Math.min(ThreadLocalRandom.current().nextInt(1, 4), rows.size());
                 return session
-                                .set("nbSelectionBordereau", nb)
-                                .set("selectionBordereauxJson", String.join(",", rows.subList(0, nb)))
-                                .set("selectionBordereauIds", String.join(",", ids.subList(0, nb)))
+                                .set("nbSelectionBordereau", rows.size())
+                                .set("selectionBordereauxJson", String.join(",", rows))
+                                .set("selectionBordereauIds", String.join(",", ids))
                                 .set("exerciceComptableJson", compact(session.getString("exerciceComptableJson")));
         });
 

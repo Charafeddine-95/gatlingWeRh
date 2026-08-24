@@ -8,6 +8,7 @@ import io.gatling.javaapi.core.ChainBuilder;
 import io.gatling.javaapi.http.HttpRequestActionBuilder;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import static io.gatling.javaapi.core.CoreDsl.*;
 
 /** Notification API calls. */
@@ -276,7 +277,7 @@ public final class ExecutionApiEndpoints {
                         .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirListeLiquidations?fieldNames%5B%5D=!liquidationRef.executionBudgetListe%20!liquidationRecetteRef.executionBudgetListe")
                         .body(StringBody(
                                         """
-                                                             {"selCrit":{"id":-1,"marque":0,"exercice":{"id":25,"marque":0,"sourceInformationRatios":{"_id":1,"_lib":"DGCP","@id":4,"@type":"TypeSourceInformation"},"@id":3,"@type":"ExerciceComptable"},"mandatTitre":{"id":0,"marque":0,"@id":5,"@type":"MandatTitre"},"serieBord":{"id":4,"marque":0,"@id":6,"@type":"SerieBordereauLiquidation"},"operateurSelMandat":{"_id":259,"_lib":"égal à or Null","@id":7,"@type":"RechercheOperateurEnum"},"typeMouvement":{"_id":3,"_lib":"Tous","@id":8,"@type":"TypeMouvementATraiter"},"@id":2,"@type":"SelectionLiquidation"}}
+                                                             {"selCrit":{"id":-1,"marque":0,"exercice":{"id":#{userContextCBE.exercice.exercice.id},"marque":0,"sourceInformationRatios":{"_id":1,"_lib":"DGCP","@id":4,"@type":"TypeSourceInformation"},"@id":3,"@type":"ExerciceComptable"},"mandatTitre":{"id":0,"marque":0,"@id":5,"@type":"MandatTitre"},"serieBord":{"id":4,"marque":0,"@id":6,"@type":"SerieBordereauLiquidation"},"operateurSelMandat":{"_id":259,"_lib":"égal à or Null","@id":7,"@type":"RechercheOperateurEnum"},"typeMouvement":{"_id":3,"_lib":"Tous","@id":8,"@type":"TypeMouvementATraiter"},"@id":2,"@type":"SelectionLiquidation"}}
                                                         """))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jsonPath("$.donnees[0].id").ofInt().gt(0))
@@ -342,13 +343,36 @@ public final class ExecutionApiEndpoints {
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("\"@id\"").ofInt().gt(0));
 
+        /**
+         * Hands every virtual user a page of its own in the bordereaux grid, so that two users
+         * never tick the same bordereau. The counter is claimed once per user, when it reaches
+         * the edition screen, and lands in the session as {@code slotBordereau} — the grid call
+         * below sends it as its {@code pageIndex}, with a page size of 1.
+         *
+         * <p>Sized for one bordereau per user: with more users than the grid holds, the last
+         * ones get an empty page and {@code EditionBordereauApiEndpoints.choisirBordereaux}
+         * stops them with that message rather than letting them collide.
+         */
+        private static final AtomicInteger PROCHAIN_SLOT_BORDEREAU = new AtomicInteger();
+
+        /** Claims this user's page of the grid. Runs once, just before the grid call. */
+        public static final ChainBuilder reserverBordereau =
+                        exec(session -> session.set("slotBordereau", PROCHAIN_SLOT_BORDEREAU.getAndIncrement()));
+
+        /**
+         * The bordereaux grid, paginated down to the single row this user owns — see
+         * {@link #reserverBordereau}. The recording asks for the whole page (1000 rows); one row
+         * per user is what keeps concurrent passes off each other's bordereaux, and it also means
+         * the row comes back with its own self-contained {@code @id} numbering, which an
+         * arbitrary row lifted out of a full page does not have.
+         */
         public static final HttpRequestActionBuilder fournirListeBordereauxAvecMontant = http(
                         "Fournir liste bordereaux avec montant")
                         .post(
                                         "https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirListeBordereauxAvecMontant?fieldNames%5B%5D=**")
                         .body(StringBody(
                                         """
-{"param":{"listeCriteres":[{"lienClassePersistante":"Bordereau","lienAttribut":"serieBordereauLiquidationRef.id","valeur":4,"operateur":{"_id":3,"_lib":"égal à","@id":4,"@type":"RechercheOperateurEnum"},"@id":3,"@type":"RechercheCritere"},{"lienClassePersistante":"Bordereau","lienAttribut":"millesime","valeur":2026,"operateur":4,"@id":5,"@type":"RechercheCritere"}],"listeCriteresRechercheGui":[],"listeAttributs":[],"listeTris":[],"distinct":false,"paginatorValues":{"length":1000,"pageIndex":0,"pageSize":1000,"previousPageIndex":0},"@id":2,"@type":"RechercheParametres"},"search":null,"sortValue":{"active":"numeroBordereau","direction":"desc"}}
+{"param":{"listeCriteres":[{"lienClassePersistante":"Bordereau","lienAttribut":"serieBordereauLiquidationRef.id","valeur":4,"operateur":{"_id":3,"_lib":"égal à","@id":4,"@type":"RechercheOperateurEnum"},"@id":3,"@type":"RechercheCritere"},{"lienClassePersistante":"Bordereau","lienAttribut":"millesime","valeur":2026,"operateur":4,"@id":5,"@type":"RechercheCritere"}],"listeCriteresRechercheGui":[],"listeAttributs":[],"listeTris":[],"distinct":false,"paginatorValues":{"length":1000,"pageIndex":#{slotBordereau},"pageSize":1,"previousPageIndex":0},"@id":2,"@type":"RechercheParametres"},"search":null,"sortValue":{"active":"numeroBordereau","direction":"desc"}}
                                                         """))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("donnees[0].id").ofInt().gt(0))
