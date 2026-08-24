@@ -27,7 +27,11 @@ public final class EditionGroup {
                     EditionApiEndpoints.chargerFieldsGrandlivre,
                     EditionApiEndpoints.chargerListeCollectiviteByCritereLieBudget,
                     EditionApiEndpoints.chargerListeBudget,
-                    EditionApiEndpoints.chargerListe
+                    EditionApiEndpoints.chargerListe,
+                    EditionApiEndpoints.fournirListeElementAnalytiqueParListeBudget,
+                    EditionApiEndpoints.fournirListeElementAnalytiqueParListeBudget2,
+                    EditionApiEndpoints.chargerVisibilitecolonne,
+                    EditionApiEndpoints.fournirDonneesMultiCollectivite
             );
 
 }
