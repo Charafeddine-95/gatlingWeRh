@@ -150,11 +150,22 @@ public class MySimulation extends Simulation {
             LoginGroup.login,
             pause(Duration.ofMillis(500)),
             DashboardGroup.open,
-            EditionGroup.open
+            EditionGroup.grandLivre
+    );
+
+
+    ScenarioBuilder situationbudgetaire = scenario("WeGF Situation Budgetaire").exec(
+            ApiHeaders.initTenants,
+            WebPages.home,
+            pause(1),
+            LoginGroup.login,
+            pause(Duration.ofMillis(500)),
+            DashboardGroup.open,
+            EditionGroup.situationBudgetaire
     );
 
     {
-        setUp(grandLivre.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+        setUp(situationbudgetaire.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
     }
 
 }

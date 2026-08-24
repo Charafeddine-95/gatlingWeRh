@@ -19,7 +19,7 @@ public final class EditionApiEndpoints {
 
     // TODO check if same id and millesime in usercontextcbe
     public static final HttpRequestActionBuilder chargerFieldsGrandlivre = http("Charger fields grand livre")
-            .post("https://wegf-api.uat.wemagnus.com/compta/UseCaseTechnique/charger2?fieldNames%5B%5D=id,%20millesime,%20budgetRef,*.id,*.collectiviteRef,*.collectiviteRef.id,%20normeComptableRef\n")
+            .post("https://wegf-api.uat.wemagnus.com/compta/UseCaseTechnique/charger2?fieldNames%5B%5D=id,%20millesime,%20budgetRef,*.id,*.collectiviteRef,*.collectiviteRef.id,%20normeComptableRef")
             .body(StringBody(
                     "{\"classePersistante\":\"ExerciceComptable\",\"id\":#{userContextCBE.exercice.exercice.id},\"elementACharger\":[\"budgetRef.collectiviteRef\",\"normeComptableRef\"]}"))
             .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
@@ -30,7 +30,7 @@ public final class EditionApiEndpoints {
 
 
     public static final HttpRequestActionBuilder chargerListeCollectiviteByCritereLieBudget = http("charger ListeCollectiviteByCritereLieBudget")
-            .post("https://wegf-api.uat.wemagnus.com/compta/Collectivite/chargerListeCollectiviteByCritereLieBudget?fieldNames%5B%5D=*.id,%20*.code,*.libelle\n")
+            .post("https://wegf-api.uat.wemagnus.com/compta/Collectivite/chargerListeCollectiviteByCritereLieBudget?fieldNames%5B%5D=*.id,%20*.code,*.libelle")
             .body(StringBody(
                     """
                             {"param":{"listeCriteres":[],"listeCriteresRechercheGui":[],"listeAttributs":[],"listeTris":[],"distinct":false,"@id":2,"@type":"RechercheParametres"},"elements":null,"isAfficherUniquementColSuiviesBudget":true}
@@ -41,17 +41,17 @@ public final class EditionApiEndpoints {
 
 
     public static final HttpRequestActionBuilder chargerListeBudget = http("charger ListeBudget")
-            .post("https://wegf-api.uat.wemagnus.com/compta/Budget/chargerListeBudget?fieldNames%5B%5D=*.id,%20*.code,*.libelle,*.collectiviteRef,*.collectiviteRef.id\n")
+            .post("https://wegf-api.uat.wemagnus.com/compta/Budget/chargerListeBudget?fieldNames%5B%5D=*.id,%20*.code,*.libelle,*.collectiviteRef,*.collectiviteRef.id")
             .body(StringBody(
                     """
-                            {"param":{"listeCriteres":[],"listeCriteresRechercheGui":[{"lienClassePersistante":"Budget","lienAttribut":"collectiviteRef.id","valeur":1,"operateur":{"_id":3,"_lib":"égal à","@id":4,"@type":"RechercheOperateurEnum"},"@id":3,"@type":"RechercheCritere"}],"listeAttributs":[],"listeTris":[],"distinct":false,"@id":2,"@type":"RechercheParametres"}}
+                            {"param":{"listeCriteres":[],"listeCriteresRechercheGui":[{"lienClassePersistante":"Budget","lienAttribut":"collectiviteRef.id","valeur":#{userContextCBE.exercice.collectivite.id},"operateur":{"_id":3,"_lib":"égal à","@id":4,"@type":"RechercheOperateurEnum"},"@id":3,"@type":"RechercheCritere"}],"listeAttributs":[],"listeTris":[],"distinct":false,"@id":2,"@type":"RechercheParametres"}}
                             """))
             .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
             .check(jmesPath("donnees[0].id").ofInt().gt(0));
 
 
     public static final HttpRequestActionBuilder chargerListe = http("chargerListe")
-            .post("https://wegf-api.uat.wemagnus.com/compta/UseCaseTechnique/chargerListe?fieldNames%5B%5D=donnees,*.millesime,%20*.id\n")
+            .post("https://wegf-api.uat.wemagnus.com/compta/UseCaseTechnique/chargerListe?fieldNames%5B%5D=donnees,*.millesime,%20*.id")
             .body(StringBody(
                     """
                             {"classePersistante":"ExerciceComptable","parametresRecherche":{"listeCriteres":[],"listeCriteresRechercheGui":[{"lienClassePersistante":"ExerciceComptable","lienAttribut":"budgetRef.id","valeur":#{IdbudgetRef},"operateur":{"_id":3,"_lib":"égal à","@id":4,"@type":"RechercheOperateurEnum"},"@id":3,"@type":"RechercheCritere"}],"listeAttributs":[],"listeTris":[{"croissant":true,"lienClassePersistante":"ExerciceComptable","lienAttribut":"millesime","@id":5,"@type":"RechercheTri"}],"distinct":false,"paginatorValues":{"length":10000,"pageIndex":0,"pageSize":10000,"previousPageIndex":0},"@id":2,"@type":"RechercheParametres"}}
@@ -97,6 +97,28 @@ public final class EditionApiEndpoints {
             .body(StringBody(
                     """
 {"criteres":{"id":-1,"marque":0,"eliminerEngagementSolde":true,"exclurePrevisionLieesHypothesesSurExerciceCourant":true,"exclurePrevisionLieesHypothesesSurExercicesAnterieurs":true,"nbExercicesATraiter":0,"recupererLignesExecutions":true,"recupererLignesPrevisions":true,"section":{"_id":1,"_lib":"Fonctionnement et Investissement","libelleCollectivite":"Fonctionnement et Investissement","libelleEHPAD":"Exploitation et Investissement","@id":3,"@type":"TypeGestionSections"},"sens":{"_id":1,"_lib":"Dépense et Recette","@id":4,"@type":"TypeGestionSens"},"type":{"_id":4,"_lib":"Réalisé et prévu","@id":5,"@type":"Type"},"typeIb":{"_id":3,"_lib":"Réel et Ordre","@id":6,"@type":"TypeIB"},"typePiece":{"_id":1,"_lib":"Toutes pièces","@id":7,"@type":"TypePiece"},"utiliserEAFilsSiEAClassement":true,"traiterTousBudgetsDeCollectivite":false,"traiterToutesCollectivites":false,"paginatorValues":{"length":10000,"pageIndex":0,"pageSize":10000,"previousPageIndex":0},"millesimeDebut":#{millesime},"millesimeFin":#{millesime},"tiers":null,"compteUtilisateur":null,"fonctionUtilisateur":null,"operation":null,"@id":2,"@type":"CriteresSelectionSituation"},"colonnesAffichees":["sens","compte","millesimeCourant","date","type","objet","serieBordereauLiquidation","numBordereau","numPiece","numEngagement","section","chapitre","imputation","tiersComptable","totalRV","engage","resteEngage","liquide","realise","idCollectivite","idBudget","idEtapeBudget","codeCollectivite","libelleCollectivite","codeCompte","codeBudget","libBudget","idPrevisionBudget"],"type":{"_id":2,"_lib":"Grand Livre par chapitre","@id":2,"@type":"TypeUtilisationEditionCommun"},"listBudget":{"donnees":[{"id":#{IdbudgetRef},"marque":0,"collectiviteRef":{"id":#{userContextCBE.exercice.collectivite.id},"marque":0,"@id":4,"@type":"Collectivite"},"@id":3,"@type":"Budget"}],"@id":2,"@type":"TableauEntitePersistante"}}
+                            """))
+            .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+            .check(jmesPath("tableauDonnee.donnees").exists());
+
+
+
+    public static final HttpRequestActionBuilder chargerListeSituationbudgetaire = http("chargerListeSituationbudgetaire")
+            .post("https://wegf-api.uat.wemagnus.com/compta/UseCaseTechnique/chargerListe?fieldNames%5B%5D=nombreTotalElements,%20donnees%20,*.id,*.code,%20*.libelle")
+            .body(StringBody(
+                    """
+{"classePersistante":"OperationdInvestissement","parametresRecherche":{"listeCriteres":[{"lienClassePersistante":"OperationdInvestissement","lienAttribut":"budgetRef","valeur":{"id":#{IdbudgetRef},"marque":0,"collectiviteRef":{"id":#{userContextCBE.exercice.collectivite.id},"marque":0,"@id":5,"@type":"Collectivite"},"@id":4,"@type":"Budget"},"operateur":{"_id":3,"_lib":"égal à","@id":6,"@type":"RechercheOperateurEnum"},"@id":3,"@type":"RechercheCritere"},{"lienClassePersistante":"OperationdInvestissement","lienAttribut":"exerciceDebut","valeur":#{millesime},"operateur":{"_id":7,"_lib":"inférieur ou égal à","@id":8,"@type":"RechercheOperateurEnum"},"@id":7,"@type":"RechercheCritere"},{"lienClassePersistante":"OperationdInvestissement","lienAttribut":"exerciceFin","valeur":#{millesime},"operateur":{"_id":261,"_lib":"supérieur ou égal à or Null","@id":10,"@type":"RechercheOperateurEnum"},"@id":9,"@type":"RechercheCritere"}],"listeCriteresRechercheGui":[],"listeAttributs":[],"listeTris":[{"croissant":true,"lienClassePersistante":"OperationdInvestissement","lienAttribut":"code","@id":11,"@type":"RechercheTri"}],"distinct":false,"paginatorValues":{"length":10000,"pageIndex":0,"pageSize":10000,"previousPageIndex":0},"@id":2,"@type":"RechercheParametres"}}
+                            """))
+            .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
+            .check(jmesPath("donnees").exists());
+
+
+
+    public static final HttpRequestActionBuilder fournirDonneesMultiCollectiviteSituationBudgestaire = http("Situation Budgeataire chargerVisibilitecolonne ")
+            .post("https://wegf-api.uat.wemagnus.com/compta/UcEditionCommun/fournirDonneesMultiCollectivite?fieldNames%5B%5D=**")
+            .body(StringBody(
+                    """
+                            {"criteres":{"id":-1,"marque":0,"nbExercicesATraiter":0,"reporterPeriodeAuxExercicesAnterieurs":false,"traiterTousBudgetsDeCollectivite":true,"budget":null,"collectivite":null,"section":{"_id":1,"_lib":"Fonctionnement et Investissement","libelleCollectivite":"Fonctionnement et Investissement","libelleEHPAD":"Exploitation et Investissement","@id":3,"@type":"TypeGestionSections"},"sens":{"_id":1,"_lib":"Dépense et Recette","@id":4,"@type":"TypeGestionSens"},"typeIb":{"_id":3,"_lib":"Réel et Ordre","@id":5,"@type":"TypeIB"},"utiliserTypeIb":false,"utiliserEAFilsSiEAClassement":true,"eliminerEngagementSolde":false,"traiterToutesCollectivites":true,"paginatorValues":{"length":10000,"pageIndex":0,"pageSize":10000,"previousPageIndex":0},"millesimeFin":#{millesime},"compteUtilisateur":null,"utiliserCodeCompteUtilisateur":false,"fonctionUtilisateur":null,"utiliserCodeFonctionUtilisateur":false,"operation":null,"@id":2,"@type":"CriteresSelectionSituation"},"colonnesAffichees":["sens","section","chapitre","compte","prevu","realise","pourcentageRealise","disponible","pourcentageDisponible","codeBudget"],"type":{"_id":8,"_lib":"Situation Budgétaire par chapitre","@id":2,"@type":"TypeUtilisationEditionCommun"},"listBudget":{"donnees":[{"id":#{IdbudgetRef},"marque":0,"collectiviteRef":{"id":#{userContextCBE.exercice.collectivite.id},"marque":0,"@id":4,"@type":"Collectivite"},"@id":3,"@type":"Budget"}],"@id":2,"@type":"TableauEntitePersistante"}}
                             """))
             .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
             .check(jmesPath("tableauDonnee.donnees").exists());

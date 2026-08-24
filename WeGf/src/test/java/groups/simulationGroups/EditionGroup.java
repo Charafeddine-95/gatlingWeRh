@@ -21,8 +21,8 @@ public final class EditionGroup {
     /**
      * First dashboard load after login: SPA reload, silent SSO, then the initial burst of context/contract/notification calls.
      */
-    public static final ChainBuilder open =
-            group("Open Editio grand livre").on(
+    public static final ChainBuilder grandLivre =
+            group("Open Edition grand livre").on(
                     WebPages.Grandlivre,
                     EditionApiEndpoints.chargerFieldsGrandlivre,
                     EditionApiEndpoints.chargerListeCollectiviteByCritereLieBudget,
@@ -33,5 +33,23 @@ public final class EditionGroup {
                     EditionApiEndpoints.chargerVisibilitecolonne,
                     EditionApiEndpoints.fournirDonneesMultiCollectivite
             );
+
+    public static final ChainBuilder situationBudgetaire =
+            group("Open Edition situation budgetaire").on(
+                    WebPages.Situationbudgetaire,
+                    EditionApiEndpoints.chargerFieldsGrandlivre,
+                    EditionApiEndpoints.chargerListeCollectiviteByCritereLieBudget,
+                    EditionApiEndpoints.chargerListeBudget,
+                    EditionApiEndpoints.chargerListe,
+                    EditionApiEndpoints.chargerListeSituationbudgetaire,
+                    EditionApiEndpoints.fournirListeElementAnalytiqueParListeBudget,
+                    EditionApiEndpoints.fournirListeElementAnalytiqueParListeBudget2,
+                    EditionApiEndpoints.chargerVisibilitecolonne,
+                    EditionApiEndpoints.fournirDonneesMultiCollectiviteSituationBudgestaire
+
+
+
+
+                    );
 
 }
