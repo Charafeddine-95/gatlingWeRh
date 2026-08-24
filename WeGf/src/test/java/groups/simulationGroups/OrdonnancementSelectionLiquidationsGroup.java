@@ -53,6 +53,9 @@ public final class OrdonnancementSelectionLiquidationsGroup {
     public static final ChainBuilder editionBordereau =
             group("Edition bordereau").on(
                     ExecutionApiEndpoints.chargerTailleLimite,
+                    // Sends no request: claims this user's page of the grid so the call below
+                    // brings back a bordereau nobody else is working on.
+                    ExecutionApiEndpoints.reserverBordereau,
                     ExecutionApiEndpoints.fournirListeBordereauxAvecMontant,
                     EditionBordereauApiEndpoints.choisirBordereaux,
                     // Same shape as the liquidation ticks above: every tick re-sizes the PES flux
