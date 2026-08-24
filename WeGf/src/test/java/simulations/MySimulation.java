@@ -174,7 +174,7 @@ public class MySimulation extends Simulation {
     );
 
     {
-        setUp(situationbudgetaire.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
+        setUp(openOrdonnancement.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
     }
 
 }

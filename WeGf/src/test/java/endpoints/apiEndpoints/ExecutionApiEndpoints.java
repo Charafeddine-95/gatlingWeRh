@@ -76,6 +76,8 @@ public final class ExecutionApiEndpoints {
 
         public static final HttpRequestActionBuilder chargerTailleLimite = http("Charger taille limite")
                         .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/chargerTailleLimitePES?fieldNames%5B%5D=**")
+                        // The screen posts an empty JSON object, not an empty body.
+                        .body(StringBody("{}"))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(bodyLength().gt(0));
 
@@ -261,6 +263,20 @@ public final class ExecutionApiEndpoints {
                                                         """))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"));
 
+        /**
+         * Same count, re-asked once the user has picked a serie: the screen adds {@code serieBord}
+         * and renumbers the two {@code @id}s after it. Same request name as the call above, which
+         * is what the browser does too — one endpoint, two bodies.
+         */
+        public static final HttpRequestActionBuilder fournirListeLiquidationsCountSerie = http(
+                        "Fournir liste serie LiquidationsCount")
+                        .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirListeLiquidationsCount")
+                        .body(StringBody(
+                                        """
+                                                             {"selCrit":{"id":-1,"marque":0,"exercice":{"id":#{idExerciceComptable},"marque":0,"sourceInformationRatios":{"_id":1,"_lib":"DGCP","@id":4,"@type":"TypeSourceInformation"},"@id":3,"@type":"ExerciceComptable"},"mandatTitre":{"id":0,"marque":0,"@id":5,"@type":"MandatTitre"},"serieBord":{"id":4,"marque":0,"@id":6,"@type":"SerieBordereauLiquidation"},"operateurSelMandat":{"_id":259,"_lib":"égal à or Null","@id":7,"@type":"RechercheOperateurEnum"},"typeMouvement":{"_id":3,"_lib":"Tous","@id":8,"@type":"TypeMouvementATraiter"},"@id":2,"@type":"SelectionLiquidation"}}
+                                                        """))
+                        .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"));
+
         public static final HttpRequestActionBuilder chargerConfigEditionPiecePourBudget = http(
                         "Charger chargerConfigEditionPiecePourBudget")
                         .post("https://wegf-api.uat.wemagnus.com/compta/UcMandatTitre/chargerConfigEditionPiecePourBudget?fieldNames%5B%5D=**")
@@ -276,7 +292,7 @@ public final class ExecutionApiEndpoints {
                         .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirListeLiquidations?fieldNames%5B%5D=!liquidationRef.executionBudgetListe%20!liquidationRecetteRef.executionBudgetListe")
                         .body(StringBody(
                                         """
-                                                             {"selCrit":{"id":-1,"marque":0,"exercice":{"id":25,"marque":0,"sourceInformationRatios":{"_id":1,"_lib":"DGCP","@id":4,"@type":"TypeSourceInformation"},"@id":3,"@type":"ExerciceComptable"},"mandatTitre":{"id":0,"marque":0,"@id":5,"@type":"MandatTitre"},"serieBord":{"id":4,"marque":0,"@id":6,"@type":"SerieBordereauLiquidation"},"operateurSelMandat":{"_id":259,"_lib":"égal à or Null","@id":7,"@type":"RechercheOperateurEnum"},"typeMouvement":{"_id":3,"_lib":"Tous","@id":8,"@type":"TypeMouvementATraiter"},"@id":2,"@type":"SelectionLiquidation"}}
+                                                             {"selCrit":{"id":-1,"marque":0,"exercice":{"id":#{idExerciceComptable},"marque":0,"sourceInformationRatios":{"_id":1,"_lib":"DGCP","@id":4,"@type":"TypeSourceInformation"},"@id":3,"@type":"ExerciceComptable"},"mandatTitre":{"id":0,"marque":0,"@id":5,"@type":"MandatTitre"},"serieBord":{"id":4,"marque":0,"@id":6,"@type":"SerieBordereauLiquidation"},"operateurSelMandat":{"_id":259,"_lib":"égal à or Null","@id":7,"@type":"RechercheOperateurEnum"},"typeMouvement":{"_id":3,"_lib":"Tous","@id":8,"@type":"TypeMouvementATraiter"},"@id":2,"@type":"SelectionLiquidation"}}
                                                         """))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jsonPath("$.donnees[0].id").ofInt().gt(0))
