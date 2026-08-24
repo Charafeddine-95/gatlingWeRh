@@ -18,7 +18,8 @@ public final class AuthApiEndpoints {
     /**
      * Exchanges the authorization code saved by the login pages ("authorizationCode")
      * and saves the issued access token as "accessToken"; the authenticated endpoints
-     * send it back through the "Bearer #{accessToken}" header.
+     * send it back through the "Bearer #{accessToken}" header. "expiresIn" holds the
+     * lifetime Keycloak announces for that token, in seconds.
      */
     public static final HttpRequestActionBuilder exchangeToken =
             http("Exchange token")
@@ -28,7 +29,8 @@ public final class AuthApiEndpoints {
                     .formParam("grant_type", "authorization_code")
                     .formParam("client_id", ApiHeaders.APP_ID)
                     .formParam("redirect_uri", "https://wegf.uat.wemagnus.com/")
-                    .check(jsonPath("$.access_token").saveAs("accessToken"));
+                    .check(jsonPath("$.access_token").saveAs("accessToken"),
+                            jsonPath("$.expires_in").saveAs("expiresIn"));
 
     /** Loads the connected user's IAM profile, right after authentication (no tenant selected yet). */
     public static final HttpRequestActionBuilder userLoginNoTenant =
