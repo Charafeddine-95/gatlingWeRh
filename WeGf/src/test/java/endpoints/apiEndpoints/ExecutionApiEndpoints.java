@@ -323,6 +323,19 @@ public final class ExecutionApiEndpoints {
          * Leave row 0 out and the others arrive with dangling references.
          */
         public static final ChainBuilder choisirLiquidations = exec(session -> {
+                // An empty grid fails the checks on fournirListeLiquidations, so the rows never
+                // reach the session. Said plainly here: left alone it surfaces as ten errors --
+                // the two list checks, setNumerotation, creerBordereauLiquidation answering
+                // without a numeroBordereau, and the six calls that then miss bordereauId --
+                // none of which name the actual cause. The serie is emptied by numeroter itself:
+                // every pass takes its liquidations out of the grid for good.
+                if (!session.contains("liquidationRows")) {
+                        throw new IllegalStateException(
+                                        "aucune liquidation a numeroter dans la serie 4 pour l'exercice "
+                                                        + session.getString("idExerciceComptable")
+                                                        + ": la serie est vide sur ce tenant, il faut de nouvelles"
+                                                        + " liquidations avant de rejouer le scenario");
+                }
                 List<String> rows = session.getList("liquidationRows");
                 int nb = Math.min(ThreadLocalRandom.current().nextInt(1, 4), rows.size());
                 return session
