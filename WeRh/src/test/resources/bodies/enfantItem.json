@@ -1,0 +1,21 @@
+{
+  "id": null,
+  "nomUsage": "#{enfantNomUsage}",
+  "prenom": "#{enfantPrenom}",
+  "dateNaissance": "#{enfantDateNaissance}",
+  "calculSFT": #{enfantCalculSft},
+  "reversementSFT": #{enfantReversementSft},
+  "dateEcheance": "#{enfantDateEcheance}",
+  "genre": "#{enfantGenre}",
+  "documents": [
+    {
+      "state": "added",
+      "id": "#{enfantDocumentId}",
+      "storageId": null,
+      "_customSize": null,
+      "lastMonthForDemat": null,
+      "isAlwaysForDemat": false
+    }
+  ],
+  "agentId": "#{agentId}"
+}

@@ -65,5 +65,11 @@ public final class WebPages {
         http("Dossier agent")
                 .get("https://werh.uat.wemagnus.com/mfe-agent/dossier-agent")
                 .queryParam("id", "#{active_agent.agentId}")
-                .queryParam("from", "mfe-agent_liste-agents");                        
+                .queryParam("from", "mfe-agent_liste-agents");
+
+        public static final HttpRequestActionBuilder dematerialisationpage =
+                http("Demat")
+                        //base64.encode() pour remplacer mois de paie : {"idCollectivite":"all","nomCollectivite":"Toutes","idEtablissement":"all","nomEtablissement":"Tous","moisPaie":"2026-08"}
+                        .get("https://werh.uat.wemagnus.com/mfe-paie/dematerialiser-bulletins?from=mfe-paie_home&params=eyJpZENvbGxlY3Rpdml0ZSI6ImFsbCIsIm5vbUNvbGxlY3Rpdml0ZSI6IlRvdXRlcyIsImlkRXRhYmxpc3NlbWVudCI6ImFsbCIsIm5vbUV0YWJsaXNzZW1lbnQiOiJUb3VzIiwibW9pc1BhaWUiOiIyMDI2LTA4In0")
+                ;
 }

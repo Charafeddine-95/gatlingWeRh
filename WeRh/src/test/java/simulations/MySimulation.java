@@ -166,11 +166,12 @@ public class MySimulation extends Simulation {
             pause(Duration.ofMillis(500)),
             DashboardGroup.open,
             pause(2),
-            PayAssistantGroup.open,
-            pause(3),
-            VisualiserBulletinsGroup.open,
-            pause(1),
-            EtatDeChargeGroup.open);
+            DematerialisationGroup.open);
+//            PayAssistantGroup.open,
+//            pause(3),
+//            VisualiserBulletinsGroup.open,
+//            pause(1),
+//            EtatDeChargeGroup.open);
 
     ScenarioBuilder createAgent = scenario("Create agent").exec(
             ApiHeaders.initTenants,
@@ -181,6 +182,6 @@ public class MySimulation extends Simulation {
             CreateAgentGroup.open);
 
     {
-        setUp(userJourney.injectOpen(atOnceUsers(20)).protocols(httpProtocol));
+        setUp(payVisualiserBulletinsEtatCaisse.injectOpen(atOnceUsers(1)).protocols(httpProtocol));
     }
 }

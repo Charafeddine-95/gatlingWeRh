@@ -363,4 +363,26 @@ public final class PayApiEndpoints {
                         .get(WERH_API + "/pay/bordereaux-urssaf/#{payMonth}?filters=%7B%7D")
                         .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
 
+        public static final HttpRequestActionBuilder generateFileDemat = http("generateFileDemat")
+                .get(WERH_API + "/pay/demat-pivot/generate-file-xhl?monthPay=#{payMonth}&collectiviteId=#{collectivite.id}&etablissementId=#{etablissementId}")
+                .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"))
+                .check(jsonPath("$.id").saveAs("traceId"));
+
+        public static final HttpRequestActionBuilder generatedFileDemat = http("generatedFileDemat")
+                .get(WERH_API + "pay/demat-pivot/generated-file?traceId=#{traceId}")
+                .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
+        public static final HttpRequestActionBuilder documentsAgent = http("documentsAgents")
+                .get(WERH_API + "pay/demat-pivot/document-agents?monthPay=#{payMonth}&collectiviteId=#{collectivite.id}&etablissementId=#{etablissementId}")
+                .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"));
+
+        public final static ChainBuilder dematPivotStream = exec(sse("Demat Pivot Stream").sseName("dematPivot")
+                .get(WERH_API + "/pay/sse/demat-pivot/")
+                .headers(ApiHeaders.bearerWithTenant())
+                .await(30).on(
+                        sse.checkMessage("demat pivot event")
+                .check(regex("\"event\":\"dematerialisation\"").saveAs("dematPivotEvent"))))
+                .exec(sse("Demat Pivot Stream").sseName("dematPivot").close());
+
+
 }

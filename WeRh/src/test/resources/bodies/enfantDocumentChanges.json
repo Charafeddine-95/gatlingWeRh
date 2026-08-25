@@ -1,0 +1,11 @@
+{
+  "deletedIds": [],
+  "addedInfos": [
+    {
+      "id": "#{enfantDocumentId}",
+      "nom": "#{enfantDocumentFileName}",
+      "lastMonthForDemat": null,
+      "isAlwaysForDemat": false
+    }
+  ]
+}
