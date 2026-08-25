@@ -26,7 +26,11 @@ public final class OuverturePaieGroup {
             PayApiEndpoints.contratActif,
             PayApiEndpoints.agentUnpaid,
             PayApiEndpoints.contratActif,
-            PayApiEndpoints.agentUnpaid,
-            // Need to do the other endpoints for real closing
+            PayApiEndpoints.agentUnpaid);
+
+
+            // need to make sure we have the session variables to call it
+    public static final ChainBuilder close = group("Ouverture paie group").on(
             PayApiEndpoints.cloturerBulletin);
+
 }

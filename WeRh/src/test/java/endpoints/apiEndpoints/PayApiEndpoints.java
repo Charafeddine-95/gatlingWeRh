@@ -80,7 +80,13 @@ public final class PayApiEndpoints {
          * stream.
          */
         public static final ChainBuilder spreadActiveCycle = exec(session -> {
-                Map<String, Object> cycle = session.getMap("activeCycle");
+                Map<String, Object> cycle = selectCycle(session);
+                if (cycle.isEmpty()) {
+                        // "Payroll cycle resume" has not run yet, or returned no cycle. Fail here
+                        // rather than spreading nulls: those only surface much later, as
+                        // "Attribute cyclePaieId's value is null" on the calls that reuse them.
+                        return session.markAsFailed();
+                }
                 String ouvert = (String) cycle.get("dernierMoisOuvert");
                 String cloture = (String) cycle.get("dernierMoisCloture");
                 Session updated = session
@@ -98,6 +104,25 @@ public final class PayApiEndpoints {
                 }
                 return updated;
         });
+
+        /**
+         * The cycle {@link #spreadActiveCycle} spreads, out of what {@link #cycleResume} returned:
+         * the cycle of the agent currently opened when the journey opened one — a payslip only
+         * exists in the cycle of its own etablissement — and the random cycle otherwise.
+         */
+        @SuppressWarnings("unchecked")
+        private static Map<String, Object> selectCycle(Session session) {
+                Object etablissementId = session.getMap("active_agent").get("etablissementId");
+                if (etablissementId != null) {
+                        for (Object element : session.getList("cycles")) {
+                                Map<String, Object> cycle = (Map<String, Object>) element;
+                                if (etablissementId.equals(cycle.get("etablissementId"))) {
+                                        return cycle;
+                                }
+                        }
+                }
+                return session.getMap("activeCycle");
+        }
 
         /** Per-etablissement payroll-cycle status for the open month. */
         public static final HttpRequestActionBuilder cycleStatus = http("Payroll cycle status")
@@ -168,7 +193,7 @@ public final class PayApiEndpoints {
                 "Controler bulletin contrat")
                 .get(CONTROLER_BULLETIN_PATH)
                 .headers(ApiHeaders.bearerForAllTenants("accept", "application/json"))
-                .check(jsonPath("$[?(@.bulletinId != null)].bulletinId")
+                .check(jsonPath("$[?(@.bulletinId != null && @.montantBrut > 0)].bulletinId")
                         .findRandom().saveAs("bulletinId"));
 
         /** Bulletin calculation summary polled right after the recompute stream. */
@@ -251,7 +276,7 @@ public final class PayApiEndpoints {
          * Payroll cycles for the agent's etablissement, loaded with the payslip tab.
          */
         public static final HttpRequestActionBuilder cyclePaieByEtablissement = http("Pay cycles by etablissement")
-                        .get(WERH_API + "/pay/cycle-paie?etablissementId=#{etablissementId}")
+                        .get(WERH_API + "/pay/cycle-paie?etablissementId=#{active_agent.etablissementId}")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"));
 
         /** Contract situation for the open month, loaded with the payslip tab. */
@@ -266,7 +291,10 @@ public final class PayApiEndpoints {
         public static final HttpRequestActionBuilder listeBulletin = http("Agent bulletin list")
                         .get(WERH_API + "/pay/paie/cycle-paie/#{cyclePaieId}/agent/#{active_agent.agentId}/contrat/#{active_agent.contratId}/listeBulletin")
                         .headers(ApiHeaders.bearerWithTenant("accept", "application/json"))
-                        .check(status().in(200, 404));
+                        // 200: the payslip list is there. 202: the server took the request and is
+                        // computing the payslip, the result comes over the bulletin stream. 404: the
+                        // agent has no payslip in that cycle. All three are what the page really gets.
+                        .check(status().in(200, 202, 404));
 
         /**
          * Server-Sent Events stream backing an individual agent's payslip (bulletin de

@@ -137,7 +137,7 @@ public final class AgentApiEndpoints {
         public static final ChainBuilder setDataAgent = exec(session -> {
                 String nomUsage = session.getString("nomUsage");
                 String prenom = session.getString("prenom");
-                nomUsage = genererNomPrenom(8);
+                nomUsage = genererNomPrenom(8).toUpperCase();
                 prenom = genererNomPrenom(8);
                 try {
                         return session.set("nomUsage", nomUsage).set("prenom", prenom);
@@ -162,12 +162,12 @@ public final class AgentApiEndpoints {
 
         public static final HttpRequestActionBuilder cities = http("cities")
                 .get(WECROSS_API + "/city/ville?size=100")
-                .headers(ApiHeaders.bearerWithTenant("accept", "application/json", "text/plain, */*"))
+                .headers(ApiHeaders.bearerWithTenant("accept", "application/json, text/plain, */*"))
                 .check(jsonPath("$[0].designation").exists());
 
         public static final HttpRequestActionBuilder countries = http("countries")
                 .get(WECROSS_API + "/city/country")
-                .headers(ApiHeaders.bearerWithTenant("accept", "application/json", "text/plain, */*"))
+                .headers(ApiHeaders.bearerWithTenant("accept", "application/json, text/plain, */*"))
                 .check(jsonPath("$[0].designation").exists());
 
         public final HttpRequestActionBuilder adresse = http("typeAdresse")
