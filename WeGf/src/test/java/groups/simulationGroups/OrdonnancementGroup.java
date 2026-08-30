@@ -28,7 +28,7 @@ public final class OrdonnancementGroup {
                     ExecutionApiEndpoints.fournirListeSerieBordereauxOrdonnancement,
                     ExecutionApiEndpoints.fournirListeLiquidationsCount,
                     ExecutionApiEndpoints.chargerConfigEditionPiecePourBudget,
-                    ExecutionApiEndpoints.fournirListeLiquidationsCount
+                    ExecutionApiEndpoints.fournirListeLiquidationsCountSerie
             );
 
 }

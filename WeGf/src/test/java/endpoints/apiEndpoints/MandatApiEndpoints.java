@@ -101,7 +101,7 @@ public class MandatApiEndpoints {
             .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
             .body(StringBody(
                     """
-                            {"idBudget": 1}
+                            {"idBudget": #{idBudget}}
                             """))
             .check(jmesPath("\"@id\"").ofInt().gt(0));
 

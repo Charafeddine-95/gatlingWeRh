@@ -181,7 +181,7 @@ public final class EditionBordereauApiEndpoints {
                         "Fournir signataire actif collectivite")
                         .post("https://wegf-api.uat.wemagnus.com/compta/Ordonnancement/fournirSignataireActifCollectiteByCollectiviteId?fieldNames%5B%5D=**")
                         .body(StringBody("{\"bordereauListe\":" + bordereauListe("Association")
-                                        + ",\"idCollectivite\":1,\"exerciceComptable\":#{exerciceComptableJson}}"))
+                                        + ",\"idCollectivite\":#{userContextCBE.exercice.collectivite.id},\"exerciceComptable\":#{exerciceComptableJson}}"))
                         .headers(ApiHeaders.bearerWithTenant("content-type", "application/json"))
                         .check(jmesPath("\"@id\"").ofInt().gt(0));
 

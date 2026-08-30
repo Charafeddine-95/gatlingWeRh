@@ -35,7 +35,12 @@ public final class OrdonnancementSelectionLiquidationsGroup {
                     repeat("#{nbSelection}", "tick").on(
                             repeat(session -> session.getInt("tick") + 1, "indexLiquidation").on(
                                     ExecutionApiEndpoints.fournirTailleLiquidationPourPES))
-            );
+            )
+            // Nothing downstream works without a ticked liquidation: numeroter would answer
+            // without a numeroBordereau and every call after it would miss bordereauId. A user
+            // that gets no grid leaves here, with the reason choisirLiquidations printed,
+            // instead of trailing six "No attribute named" errors behind it.
+            .exitHereIfFailed();
 
 
     /**
